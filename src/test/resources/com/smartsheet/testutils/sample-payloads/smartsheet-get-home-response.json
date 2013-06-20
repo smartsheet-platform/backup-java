@@ -1,0 +1,125 @@
+{
+  "sheets": [
+    {
+      "id": 7184520194615172,
+      "name": "lev 1 sheet 1",
+      "accessLevel": "OWNER"
+    },
+    {
+      "id": 8507576280213380,
+      "name": "shared sheet",
+      "accessLevel": "ADMIN"
+    },
+    {
+      "id": 2455864280934276,
+      "name": "shared sheet in folder",
+      "accessLevel": "ADMIN"
+    }
+  ],
+  "folders": [
+    {
+      "sheets": [
+        {
+          "id": 77277032671108,
+          "name": "lev 2 sheet 1",
+          "accessLevel": "OWNER"
+        }
+      ],
+      "folders": [
+        {
+          "sheets": [
+            {
+              "id": 5284564101818244,
+              "name": "lev 3.1 sheet 1",
+              "accessLevel": "OWNER"
+            },
+            {
+              "id": 7536363915503492,
+              "name": "lev 3.1 sheet 2",
+              "accessLevel": "OWNER"
+            }
+          ],
+          "folders": [],
+          "name": "lev 3.1",
+          "id": 1507815211722628
+        },
+        {
+          "name": "lev 3.2",
+          "id": 8685427117844356
+        }
+      ],
+      "name": "lev 2",
+      "id": 5096621164783492
+    },
+    {
+      "name": "lev 2",
+      "id": 8462415235966852
+    }
+  ],
+  "workspaces": [
+    {
+      "sheets": [
+        {
+          "id": 4989139071330180,
+          "name": "sheet in workspace",
+          "accessLevel": "ADMIN"
+        },
+        {
+          "id": 4720858234152836,
+          "name": "my sheet in shared workspace",
+          "accessLevel": "OWNER"
+        }
+      ],
+      "folders": [],
+      "name": "shared workspace",
+      "id": 7546140334811012,
+      "accessLevel": "ADMIN"
+    },
+    {
+      "sheets": [
+        {
+          "id": 8697448194434948,
+          "name": "lev 1 sheet 1",
+          "accessLevel": "OWNER"
+        },
+        {
+          "id": 1436823160416132,
+          "name": "lev 1 sheet 1",
+          "accessLevel": "OWNER"
+        },
+        {
+          "id": 5940422787786628,
+          "name": "lev 1 sheet 1",
+          "accessLevel": "OWNER"
+        }
+      ],
+      "folders": [
+        {
+          "sheets": [
+            {
+              "id": 1335118334846852,
+              "name": "lev 2 sheet 1",
+              "accessLevel": "OWNER"
+            }
+          ],
+          "folders": [],
+          "name": "lev 2",
+          "id": 3598536571938692
+        }
+      ],
+      "name": "workspace 1",
+      "id": 387632443221892,
+      "accessLevel": "OWNER"
+    },
+    {
+      "name": "workspace 1",
+      "id": 4166379029981060,
+      "accessLevel": "OWNER"
+    },
+    {
+      "name": "workspace 2",
+      "id": 3024261326628740,
+      "accessLevel": "OWNER"
+    }
+  ]
+}

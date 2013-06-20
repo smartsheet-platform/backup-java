@@ -1,0 +1,24 @@
+[
+  {
+    "email": "wwmcheung@hotmail.com",
+    "admin": true,
+    "licensedSheetCreator": true,
+    "id": 4149232446793604,
+    "status": "ACTIVE"
+  },
+  {
+    "email": "wwmcheungmale@gmail.com",
+    "name": "William GMale",
+    "admin": false,
+    "licensedSheetCreator": true,
+    "id": 6243080543201156,
+    "status": "ACTIVE"
+  },
+  {
+    "email": "william@firstclassmandarin.com",
+    "admin": false,
+    "licensedSheetCreator": true,
+    "id": 7662438385510276,
+    "status": "PENDING"
+  }
+]

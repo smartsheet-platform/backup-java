@@ -1,0 +1,9 @@
+*.class
+.settings
+.project
+# Package Files #
+*.jar
+*.war
+*.ear
+target
+./dependency-reduced-pom.xml
