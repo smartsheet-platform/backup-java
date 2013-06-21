@@ -70,4 +70,4 @@ Logging
 
 Contributing
 ---
-If you want to contribute a fix or an enhancement, please fork the repo and create a pull request with your changes.
+The source code for this utility is available on Github at [https://github.com/smartsheet-platform/backup-java](http://). If you want to contribute a fix or an enhancement, please fork the Github repository and create a pull request with your changes.
