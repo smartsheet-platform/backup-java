@@ -71,3 +71,5 @@ Logging
 Contributing
 ---
 The source code for this utility is available on Github at [https://github.com/smartsheet-platform/backup-java](https://github.com/smartsheet-platform/backup-java). If you want to contribute a fix or an enhancement, please fork the Github repository and create a pull request with your changes.
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/fb84ff8823ccfb788e524e4ce734af64 "githalytics.com")](http://githalytics.com/smartsheet-platform/backup-java)
