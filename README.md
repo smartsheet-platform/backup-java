@@ -41,7 +41,7 @@ How it works
 * The backup utility checks whether the specified output directory already exists.  If it does, the utility renames the directory to include its last modified timestamp, and creates a new output directory.
 * For each active user in the account, the backup utility first creates a local directory that matches the user's email address, and then retrieves and backs up all the sheets owned by that user.
 * Within each user's directory, the sheets are organized hierarchically (by folders and workspaces) to match the user's Home tab hierarchy in Smartsheet.
-* Each sheet is saved as an XLS files that matches the Sheet's name, with discussions saved on a second tab inside the XLS file.  All file attachments are saved in a directory named "[Sheet Name] - attachments".  
+* Each sheet is saved as an XLS file that matches the Sheet's name, with discussions saved on a second tab inside the XLS file.  All file attachments are saved in a directory named "[Sheet Name] - attachments".  
 * Non-file attachments (Google Drive files, Box files, and web URLs) are stored in a file called "[Sheet Name] - non-file attachments.csv" in the same directory as the file attachments. The following properties are provided for each non-file attachment: Name, URL, and AttachmentType.
 
 Usage
