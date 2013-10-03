@@ -49,8 +49,8 @@ Usage
 The tool will look for smartsheet-backup.properties file in the current directory (the directory from which it is being executed).
 Edit the properties file to set the following parameters:
 
-* "accessToken" (required) - access token that belongs to your Smartsheet account administrator
-* "outputDir" (required) - desired output directory
+* "accessToken" (required) - access token that belongs to your Smartsheet account administrator.  See the Requirements section above on how to get an access token
+* "outputDir" (required) - desired output directory.  You can provide an absolute * path (e.g., "C:\some\directory") or a path relative to the directory in which the backup utility resides (e.g., "some\directory")
 * "zipOutputDir" (optional, default is false) - set to true to create a ziped archive of the outputDir
 * "downloadThreads" (optional, default is 4) - set to desired number of threads used to download attachments
 
