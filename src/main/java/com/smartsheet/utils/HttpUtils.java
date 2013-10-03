@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketException;
 import java.net.URLEncoder;
 
 import org.apache.http.HttpEntity;
@@ -100,18 +101,27 @@ public class HttpUtils {
 	            
 	            InputStream content = getContentOnSuccess(response, url, status);
 	            InputStream inStream = new BufferedInputStream(content, ATTACHMENT_BUFFER_SIZE);
+	            if (file.exists()) {
+	            	file.delete();
+	            }
 	            OutputStream outStream = new BufferedOutputStream(new FileOutputStream(file), ATTACHMENT_BUFFER_SIZE);
 	            copyAndClose(inStream, outStream);
 	            return;
 	        } finally {
 	            httpGet.releaseConnection();
 	        }
-    	} catch (ServiceUnavailableException sue) {
+    	}  catch (ServiceUnavailableException sue) {
     		 if (i < RetryingSmartsheetService.MAX_RETRIES)
-    			 RetryingSmartsheetService.sleepForDefinedInterval(i+1, "getAttachmentDetails");
+    			 RetryingSmartsheetService.sleepForDefinedInterval(i+1, "saveUrlToFile");
              else
                  finalException = sue;
-    		}
+    		} catch (IOException se) {
+    			//There was an error downloading the sheet. We'll try again.
+        		if (i >= RetryingSmartsheetService.MAX_RETRIES) {
+        			throw se;
+        		}
+        		ProgressWatcher.notify("An unexpected error occured while attempting to download " + file.getName());
+        	}
         }
         throw finalException;
     }
