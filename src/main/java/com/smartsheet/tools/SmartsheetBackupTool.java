@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import com.smartsheet.restapi.service.RestfulSmartsheetService;
 import com.smartsheet.restapi.service.RetryingSmartsheetService;
 import com.smartsheet.restapi.service.SmartsheetService;
+import com.smartsheet.utils.ConfigHolder;
 import com.smartsheet.utils.ProgressWatcher;
 
 /**
@@ -85,7 +86,8 @@ public class SmartsheetBackupTool {
             // 3. back up the organization to a local folder
             int numberUsers = backupService.backupOrgTo(new File(outputDir));
 
-            if (parallelDownloadService.waitTillAllDownloadJobsDone()) {
+            boolean allDownloadJobsDone = parallelDownloadService.waitTillAllDownloadJobsDone();
+            if (allDownloadJobsDone || ConfigHolder.getInstance().isContinueOnError()) {
 
                 // 4. if requested, zip up the backup folder which is then deleted
                 if (zipOutputDir)
