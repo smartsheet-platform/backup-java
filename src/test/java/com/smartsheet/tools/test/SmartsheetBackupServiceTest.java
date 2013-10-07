@@ -26,9 +26,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.smartsheet.exceptions.ServiceUnavailableException;
+import com.smartsheet.restapi.service.ErrorContextualizingSmartsheetService;
 import com.smartsheet.restapi.service.RetryingSmartsheetService;
 import com.smartsheet.tools.ParallelDownloadService;
 import com.smartsheet.tools.SmartsheetBackupService;
+import com.smartsheet.utils.ConfigHolder;
 
 /**
  * Note these are <i>integration</i> tests of the {@link SmartsheetBackupService}
@@ -87,6 +89,19 @@ public class SmartsheetBackupServiceTest {
 
         SmartsheetBackupService backupService = new SmartsheetBackupService(
             new RetryingSmartsheetService(new StubServiceUnavailableSmartsheetService()),
+            parallelDownloadService);
+
+        backupToTempDir(backupService);
+    }
+
+    @Test
+    public void continuesOnNetworkErrorsIfConfigured() throws Exception {
+        printTestHeader("continuesOnExceptions");
+
+        ConfigHolder.getInstance().setContinueOnError(true);
+
+        SmartsheetBackupService backupService = new SmartsheetBackupService(
+            new ErrorContextualizingSmartsheetService(new StubBadConnectionSmartsheetService()),
             parallelDownloadService);
 
         backupToTempDir(backupService);

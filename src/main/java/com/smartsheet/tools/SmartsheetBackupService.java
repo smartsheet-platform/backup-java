@@ -37,6 +37,7 @@ import com.smartsheet.restapi.model.SmartsheetSheet;
 import com.smartsheet.restapi.model.SmartsheetUser;
 import com.smartsheet.restapi.model.SmartsheetWorkspace;
 import com.smartsheet.restapi.service.SmartsheetService;
+import com.smartsheet.utils.ErrorHandler;
 import com.smartsheet.utils.ProgressWatcher;
 
 /**
@@ -100,7 +101,13 @@ public class SmartsheetBackupService {
                     ProgressWatcher.notify(String.format(
                         "--------------------Start backup for user [%d of %d]: %s--------------------",
                         i+1, numberUsers, email));
-                    assumeUserAndBackup(backupFolder, email);
+                    try {
+                        assumeUserAndBackup(backupFolder, email);
+
+                    } catch (Exception e) {
+                        ErrorHandler.handle(e, email);
+                        skippedUsers++;
+                    }
 
                 } else {
                     // user not active yet and will result in 401 (Unauthorized)
@@ -184,7 +191,7 @@ public class SmartsheetBackupService {
             	backupFolder.renameTo(renamedFolder);
         	} else {
         		deleteFolder(backupFolder);
-        		
+
         	}
         }
 
