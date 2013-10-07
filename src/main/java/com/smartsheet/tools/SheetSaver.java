@@ -89,11 +89,12 @@ public class SheetSaver {
 
         String postedMessage = String.format(">> Download request for %s Attachment [%s]", attachmentType, attachmentName);
         String completedMessage = String.format("...%s Attachment [%s] downloaded as [%s]", attachmentType, attachmentName, filePath);
+        String errorContext = String.format("%s Attachment [%s] in Sheet [%s]", attachmentType, attachmentName, sheetName);
 
         parallelDownloadService.postAsynchronousDownloadJob(
             new SmartsheetAttachmentContentSource(apiService, attachment, sheetName),
             attachmentFile,
-            postedMessage, completedMessage);
+            postedMessage, completedMessage, errorContext);
     }
 
     /**

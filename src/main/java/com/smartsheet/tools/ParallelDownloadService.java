@@ -78,11 +78,15 @@ public class ParallelDownloadService {
      *
      * @param completedMessage
      *          The message to log when the job has been completed.
+     *
+     * @param errorContext
+     *          Textual context to add to the error message logged when the job has failed.
      */
     public void postAsynchronousDownloadJob(
             final InternetContentSource source,
             final File targetFile,
-            final String postedMessage, final String completedMessage) {
+            final String postedMessage, final String completedMessage,
+            final String errorContext) {
 
         ProgressWatcher.notify(postedMessage);
 
@@ -106,8 +110,8 @@ public class ParallelDownloadService {
                 } catch (Exception e) {
                     failures.incrementAndGet();
 
-                    ProgressWatcher.notifyError(String.format("[%s: %s] downloading from [%s] to [%s]",
-                        e.getClass().getSimpleName(), e.getLocalizedMessage(), sourceUrl, targetFile));
+                    ProgressWatcher.notifyError(String.format("[%s: %s] downloading from [%s] to [%s] for %s",
+                        e.getClass().getSimpleName(), e.getLocalizedMessage(), sourceUrl, targetFile, errorContext));
                     throw e;
                 }
             }});
