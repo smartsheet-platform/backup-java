@@ -159,7 +159,7 @@ public class ParallelDownloadService {
         // check if all completed (completions equal posts)
         allDone = completions.intValue() == posts.intValue();
         if (!allDone)
-            ProgressWatcher.getInstance().notifyError((posts.intValue() - completions.intValue()) + " parallel download jobs didn't complete");
+            ProgressWatcher.getInstance().notify("***WARNING*** " + (posts.intValue() - completions.intValue()) + " parallel download jobs didn't complete");
 
         return allDone;
     }
