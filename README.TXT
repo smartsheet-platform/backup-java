@@ -5,7 +5,7 @@ Video demo: http://screencast.com/t/oce6umyFif
 Running the application
 
 - Download the "smartsheet-org-backup-0.0.1-SNAPSHOT.jar", "smartsheet-backup.properties" files into a new folder.
-- Open the file "smartsheet-backup.properties" and provide your smartsheet API key for "accessToken" property.
+- Open the file "smartsheet-backup.properties" and provide your smartsheet API key for "accessToken" property(refer : http://www.smartsheet.com/developers/api-faq).
 - Open the command prompt and navigate to the folder (where you have placed above files).
 - enter and run the command "java -jar smartsheet-org-backup-0.0.1-SNAPSHOT.jar"
 - You will see detailed logging in the console about backup process.
