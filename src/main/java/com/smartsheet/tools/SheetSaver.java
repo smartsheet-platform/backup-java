@@ -43,7 +43,7 @@ public class SheetSaver {
     private final ParallelDownloadService parallelDownloadService;
 
     public SheetSaver(
-            SmartsheetService apiService, ParallelDownloadService parallelDownloadService) {
+            final SmartsheetService apiService, final ParallelDownloadService parallelDownloadService) {
         this.apiService = apiService;
         this.parallelDownloadService = parallelDownloadService;
     }
@@ -57,11 +57,11 @@ public class SheetSaver {
      * @throws IOException
      * @throws InterruptedException 
      */
-    public File save(SmartsheetSheet sheet, File folder) throws IOException, InterruptedException {
-        File sheetFile = createFileFor(sheet, folder, XLS_EXTENSION);
-        String url = "https://api.smartsheet.com/1.1/sheet/" + sheet.getId();
-        String accessToken = apiService.getAccessToken();
-        String userToAssume = apiService.getAssumedUser();
+    public File save(final SmartsheetSheet sheet, final File folder) throws IOException, InterruptedException {
+        final File sheetFile = createFileFor(sheet, folder, XLS_EXTENSION);
+        final String url = "https://api.smartsheet.com/1.1/sheet/" + sheet.getId();
+        final String accessToken = apiService.getAccessToken();
+        final String userToAssume = apiService.getAssumedUser();
         saveUrlToFile(url, sheetFile, accessToken, "application/vnd.ms-excel", userToAssume);
         return sheetFile;
     }
@@ -72,23 +72,15 @@ public class SheetSaver {
      *
      * @param attachment the file attachment to save
      * @param folder the existing local folder to save the file attachment to
+	 * @param sheetName
      * @throws Exception
      */
-    public void saveAsynchronously(SmartsheetAttachment attachment, File folder) throws Exception {
-        File attachmentFile = createFileFor(attachment, folder, null);
-        String filePath = attachmentFile.getAbsolutePath();
-
-        attachment = apiService.getAttachmentDetails(attachment.getId());
-
-        String attachmentType = attachment.getAttachmentType();
-        String attachmentName = attachment.getName();
-
-        String postedMessage = String.format(">> Download request for %s Attachment [%s]", attachmentType, attachmentName);
-        String completedMessage = String.format("...%s Attachment [%s] downloaded as [%s]", attachmentType, attachmentName, filePath);
-
+    public void saveAsynchronously(final SmartsheetAttachment attachment, final File folder, final String sheetName) throws Exception {
+        
+    	final File attachmentFile = createFileFor(attachment, folder, null);
+        
         parallelDownloadService.postAsynchronousDownloadJob(
-            attachment.getUrl(), attachmentFile,
-            postedMessage, completedMessage);
+            attachment.getId(), attachmentFile, apiService,sheetName);
     }
 
     /**
@@ -101,12 +93,12 @@ public class SheetSaver {
      * extension can also be specified (for example when you want to use ".xls"
      * as the extension of the file which a sheet is saved to.
      */
-    private File createFileFor(SmartsheetNamedEntity item, File folder, String extension) throws IOException {
-        int numberSuffix = 2;
-        String fileName = getUniqueFileNameForItemInFolder(item, folder, numberSuffix, extension);
+    private File createFileFor(final SmartsheetNamedEntity item, final File folder, final String extension) throws IOException {
+        final int numberSuffix = 2;
+        final String fileName = getUniqueFileNameForItemInFolder(item, folder, numberSuffix, extension);
 
-        File newFile = new File(folder, fileName);
-        ProgressWatcher.notify(String.format("Creating new file: [%s]", newFile.getCanonicalPath()));
+        final File newFile = new File(folder, fileName);
+        ProgressWatcher.notify(String.format("[UserId : %s] : Creating new file: [%s]",apiService.getAssumedUser(), newFile.getCanonicalPath()));
         if (!newFile.createNewFile())
             throw new CreateFileSystemItemException(newFile);
         return newFile;
@@ -117,16 +109,16 @@ public class SheetSaver {
      * number suffix until a unique file name is found.
      */
     private static String getUniqueFileNameForItemInFolder(
-            SmartsheetNamedEntity item, File folder, int numberSuffix, String extension) {
+            final SmartsheetNamedEntity item, final File folder, final int numberSuffix, final String extension) {
 
-        String itemName = item.getName();
+        final String itemName = item.getName();
         
         String fileNamePart;
         String extensionPart = extension;
         if (extensionPart != null) // extension supplied, so fileNamePart is just the itemName
             fileNamePart = itemName;
         else { // extension not supplied, so parse from itemName
-            int lastDotIndex = itemName.lastIndexOf(".");
+            final int lastDotIndex = itemName.lastIndexOf(".");
             if (lastDotIndex != -1) {
                 fileNamePart = itemName.substring(0, lastDotIndex);
                 extensionPart = itemName.substring(lastDotIndex);
@@ -153,7 +145,7 @@ public class SheetSaver {
         return getUniqueFileNameForItemInFolder(item, folder, numberSuffix + 1, extension);
     }
 
-    public static String scrubName(String fileName) {
+    public static String scrubName(final String fileName) {
 		
 		return fileName.replaceAll("[\\\\/:\\*?\"<>|]+", "_");
 	}
@@ -167,10 +159,10 @@ public class SheetSaver {
      * @return the CSV {@link File} where the summary was saved to
      * @throws IOException
      */
-    public File saveSummary(SmartsheetAttachment attachment, SmartsheetSheet sheet, File folder) throws IOException {
-        File summariesFile = new File(folder, scrubName(sheet.getName()) + " - non-file attachments.csv");
-        boolean writeHeader = !summariesFile.exists();
-        PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(summariesFile, true /*append*/)));
+    public File saveSummary(final SmartsheetAttachment attachment, final SmartsheetSheet sheet, final File folder) throws IOException {
+        final File summariesFile = new File(folder, scrubName(sheet.getName()) + " - non-file attachments.csv");
+        final boolean writeHeader = !summariesFile.exists();
+        final PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(summariesFile, true /*append*/)));
         try {
             if (writeHeader)
                 writer.println("Name,URL,AttachmentType");
@@ -189,7 +181,7 @@ public class SheetSaver {
     /**
      * Escape commas in a string to be added as a "column" in a CSV file.
      */
-    private static String escapeCommas(String string) {
+    private static String escapeCommas(final String string) {
         if (string.contains(","))
             return '"' + string + '"';
 
