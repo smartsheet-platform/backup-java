@@ -20,18 +20,12 @@ import static com.smartsheet.utils.HttpUtils.saveUrlToFile;
 
 import java.io.File;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.smartsheet.exceptions.ServiceUnavailableException;
-import com.smartsheet.restapi.model.SmartsheetAttachment;
-import com.smartsheet.restapi.service.SmartsheetService;
 import com.smartsheet.utils.ProgressWatcher;
-import com.smartsheet.utils.PropertyUtils;
 
 /**
  * A service which downloads files from the Internet in parallel (i.e.,
