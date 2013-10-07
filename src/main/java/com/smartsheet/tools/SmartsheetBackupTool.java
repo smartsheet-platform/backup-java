@@ -93,14 +93,14 @@ public class SmartsheetBackupTool {
 
                 // 5. tell user how long the backup took and how many users were backed up
                 String timeSummary = computeTimeSummary(startTime);
-                ProgressWatcher.notify("*** Org backup done -> [" + numberUsers + "] users total backed up in " + timeSummary + " ***");
+                ProgressWatcher.getInstance().notify("*** Org backup done -> [" + numberUsers + "] users total backed up in " + timeSummary + " ***");
 
             } else
                 exitCode = FAILURE_EXIT_CODE;
 
         } catch (Exception e) {
             // on error tell the user what was the error
-            ProgressWatcher.notifyError(e);
+            ProgressWatcher.getInstance().notifyError(e);
 
             exitCode = FAILURE_EXIT_CODE;
         }
@@ -113,7 +113,7 @@ public class SmartsheetBackupTool {
         File outputDir = new File(outputDirPath);
         zipDirectory(outputDir, new File(zipFilePath));
         deleteFolder(outputDir);
-        ProgressWatcher.notify("Zipped output dir to: " + new File(zipFilePath).getAbsolutePath());
+        ProgressWatcher.getInstance().notify("Zipped output dir to: " + new File(zipFilePath).getAbsolutePath());
     }
 
     private static String computeTimeSummary(long startTime) {
@@ -135,7 +135,7 @@ public class SmartsheetBackupTool {
         if (!file.isFile())
             throw new FileNotFoundException("File not found: " + file.getAbsolutePath());
 
-        ProgressWatcher.notify("Using properties file: " + file.getAbsolutePath());
+        ProgressWatcher.getInstance().notify("Using properties file: " + file.getAbsolutePath());
 
         FileReader reader = new FileReader(file);
         try {

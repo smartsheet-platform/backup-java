@@ -112,7 +112,7 @@ public class SheetSaver {
         String fileName = getUniqueFileNameForItemInFolder(item, folder, numberSuffix, extension);
 
         File newFile = new File(folder, fileName);
-        ProgressWatcher.notify(String.format("Creating new file: [%s]", newFile.getCanonicalPath()));
+        ProgressWatcher.getInstance().notify(String.format("Creating new file: [%s]", newFile.getCanonicalPath()));
         if (!newFile.createNewFile())
             throw new CreateFileSystemItemException(newFile);
         return newFile;

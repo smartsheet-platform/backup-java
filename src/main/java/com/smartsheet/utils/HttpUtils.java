@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
 import java.net.URLEncoder;
 
 import org.apache.http.HttpEntity;
@@ -82,7 +81,7 @@ public class HttpUtils {
     /**
      * Saves the contents at the specified URL to a local file, with the optional
      * accessToken and userToAssume arguments used when requesting the URL.
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     public static void saveUrlToFile(String url, File file, String accessToken, String acceptHeader, String userToAssume)
             throws IOException, InterruptedException {
@@ -98,7 +97,7 @@ public class HttpUtils {
 	                return; // ignore 403 if accessToken null for test mode
 	            if (status.getStatusCode() == ServiceUnavailableException.SERVICE_UNAVAILABLE_CODE)
 	                throw new ServiceUnavailableException(url);
-	            
+
 	            InputStream content = getContentOnSuccess(response, url, status);
 	            InputStream inStream = new BufferedInputStream(content, ATTACHMENT_BUFFER_SIZE);
 	            if (file.exists()) {
@@ -120,7 +119,7 @@ public class HttpUtils {
         		if (i >= RetryingSmartsheetService.MAX_RETRIES) {
         			throw se;
         		}
-        		ProgressWatcher.notify("An unexpected error occured while attempting to download " + file.getName());
+        		ProgressWatcher.getInstance().notify("An unexpected error occured while attempting to download " + file.getName());
         	}
         }
         throw finalException;

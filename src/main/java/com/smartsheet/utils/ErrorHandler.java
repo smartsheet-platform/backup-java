@@ -44,6 +44,6 @@ public class ErrorHandler {
         String error = String.format("backing up user [%s] - %s - %s",
             currentUser, exceptionType, exceptionMessage);
 
-        ProgressWatcher.notifyError(error);
+        ProgressWatcher.getInstance().notifyError(error);
     }
 }

@@ -132,12 +132,12 @@ public class RetryingSmartsheetService implements SmartsheetService {
 
     private static void notifyIfRetry(int i) {
         if (i > 0)
-            ProgressWatcher.notify("--- retry #" + i);
+            ProgressWatcher.getInstance().notify("--- retry #" + i);
     }
 
     public static void sleepForDefinedInterval(int retryNumber, String action) throws InterruptedException {
         int sleepSecs = retryNumber * WAIT_INTERVAL_SECS;
-        ProgressWatcher.notify("503 (Service Unavailable) received for [" + action + "] - sleep " + sleepSecs + " secs before retry...");
+        ProgressWatcher.getInstance().notify("503 (Service Unavailable) received for [" + action + "] - sleep " + sleepSecs + " secs before retry...");
         Thread.sleep(TimeUnit.SECONDS.toMillis(sleepSecs));
     }
 

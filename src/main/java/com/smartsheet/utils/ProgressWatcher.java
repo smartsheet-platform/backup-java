@@ -22,24 +22,37 @@ package com.smartsheet.utils;
  */
 public class ProgressWatcher {
 
+    private static final ProgressWatcher singleton = new ProgressWatcher();
+
+    public static ProgressWatcher getInstance() {
+        return singleton;
+    }
+
+    private int errorCount = 0;
+
     private ProgressWatcher() {
         // private constructor because this is a singleton helper class, not intended to be instantiated
     }
 
-    public static void notify(String status) {
+    public void notify(String status) {
         System.out.println(status);
     }
 
-    public static void notifyError(String error) {
+    public synchronized void notifyError(String error) {
         notify("***ERROR*** " + error);
+        errorCount++;
     }
 
-    public static void notifyError(Throwable error) {
+    public void notifyError(Throwable error) {
         Throwable cause = error.getCause();
         if (cause != null)
             error = cause;
         notifyError(String.format("%s - %s", error.getClass().getSimpleName(), error.getLocalizedMessage()));
         System.out.flush(); // flush before printing stack trace to avoid overlapping logs from multiple threads
         error.printStackTrace();
+    }
+
+    public int getErrorCount() {
+        return errorCount;
     }
 }
