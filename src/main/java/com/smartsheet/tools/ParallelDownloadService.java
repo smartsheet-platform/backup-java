@@ -66,8 +66,8 @@ public class ParallelDownloadService {
     /**
      * Posts an asynchronous ("parallel") download job.
      *
-     * @param sourceUrl
-     *          The URL of the source file on the Internet to download.
+     * @param source
+     *          The source of the file on the Internet to download.
      *
      * @param targetFile
      *          The local file to download the source to. The file will be
@@ -80,7 +80,8 @@ public class ParallelDownloadService {
      *          The message to log when the job has been completed.
      */
     public void postAsynchronousDownloadJob(
-            final String sourceUrl, final File targetFile,
+            final InternetContentSource source,
+            final File targetFile,
             final String postedMessage, final String completedMessage) {
 
         ProgressWatcher.notify(postedMessage);
@@ -91,7 +92,9 @@ public class ParallelDownloadService {
 
             // The logic which is executed asynchronously when a thread becomes
             // available to handle the job.
+            @Override
             public File call() throws Exception {
+                String sourceUrl = source.getURL();
                 try {
                     saveUrlToFile(sourceUrl, targetFile);
 

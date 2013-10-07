@@ -84,8 +84,6 @@ public class SheetSaver {
         File attachmentFile = createFileFor(attachment, folder, null);
         String filePath = attachmentFile.getAbsolutePath();
 
-        attachment = apiService.getAttachmentDetails(attachment.getName(), attachment.getId(), sheetName);
-
         String attachmentType = attachment.getAttachmentType();
         String attachmentName = attachment.getName();
 
@@ -93,7 +91,8 @@ public class SheetSaver {
         String completedMessage = String.format("...%s Attachment [%s] downloaded as [%s]", attachmentType, attachmentName, filePath);
 
         parallelDownloadService.postAsynchronousDownloadJob(
-            attachment.getUrl(), attachmentFile,
+            new SmartsheetAttachmentContentSource(apiService, attachment, sheetName),
+            attachmentFile,
             postedMessage, completedMessage);
     }
 
