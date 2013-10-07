@@ -16,6 +16,7 @@
 **/
 package com.smartsheet.tools.test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -31,6 +32,7 @@ import com.smartsheet.restapi.service.RetryingSmartsheetService;
 import com.smartsheet.tools.ParallelDownloadService;
 import com.smartsheet.tools.SmartsheetBackupService;
 import com.smartsheet.utils.ConfigHolder;
+import com.smartsheet.utils.ProgressWatcher;
 
 /**
  * Note these are <i>integration</i> tests of the {@link SmartsheetBackupService}
@@ -58,7 +60,15 @@ public class SmartsheetBackupServiceTest {
     @After
     public void tearDown() {
         // assert all downloads done after wait
-        assertTrue(parallelDownloadService.waitTillAllDownloadJobsDone());
+        boolean allDownloadJobsDone = parallelDownloadService.waitTillAllDownloadJobsDone();
+
+        if (!ConfigHolder.getInstance().isContinueOnError())
+            assertTrue(allDownloadJobsDone);
+        // else isContinueOnError, so acceptable if not all jobs done due to errors
+
+        // reset singletons
+        ConfigHolder.getInstance().setContinueOnError(false);
+        ProgressWatcher.getInstance().setLogErrorsToFile(false);
     }
 
     @Test
@@ -99,12 +109,19 @@ public class SmartsheetBackupServiceTest {
         printTestHeader("continuesOnExceptions");
 
         ConfigHolder.getInstance().setContinueOnError(true);
+        ProgressWatcher.getInstance().setLogErrorsToFile(true);
 
         SmartsheetBackupService backupService = new SmartsheetBackupService(
             new ErrorContextualizingSmartsheetService(new StubBadConnectionSmartsheetService()),
             parallelDownloadService);
 
         backupToTempDir(backupService);
+
+        if (ProgressWatcher.getInstance().getErrorCount() > 0) {
+            String errorLogFile = ProgressWatcher.getInstance().getErrorLogFile();
+            assertNotNull(errorLogFile);
+            System.out.println("-------------------- check error log file: " + errorLogFile  + " --------------------");
+        }
     }
 
     // helpers

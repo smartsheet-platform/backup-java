@@ -77,9 +77,6 @@ public class SmartsheetBackupTool {
             int downloadThreads = getOptionalProp(props, "downloadThreads", DEFAULT_DOWNLOAD_THREADS, 1);
             int allDownloadsDoneTimeout = getOptionalProp(props, "allDownloadsDoneTimeout", DEFAULT_ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES, 0);
 
-            // share some of the properties globally
-            configHolder.setContinueOnError(continueOnError);
-
             // 2. instantiate services
             SmartsheetService apiService = new ErrorContextualizingSmartsheetService(
                 // the ErrorContextualizingSmartsheetService wraps the RetryingSmartsheetService:
@@ -89,6 +86,9 @@ public class SmartsheetBackupTool {
 
             ParallelDownloadService parallelDownloadService = new ParallelDownloadService(
                 downloadThreads, allDownloadsDoneTimeout);
+
+            configHolder.setContinueOnError(continueOnError);
+            progressWatcher.setLogErrorsToFile(continueOnError);
 
             SmartsheetBackupService backupService = new SmartsheetBackupService(
                 apiService, parallelDownloadService);
