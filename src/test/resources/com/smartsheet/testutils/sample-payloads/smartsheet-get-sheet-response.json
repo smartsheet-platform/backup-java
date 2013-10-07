@@ -118,14 +118,6 @@
           "id": 5751669980981124,
           "sizeInKb": 3,
           "createdAt": "2013-05-12T09:42:05-04:00"
-        },
-        {
-          "name": "williamcheung.jpg",
-          "attachmentType": "FILE",
-          "mimeType": "image/jpeg",
-          "id": 8918263468976004,
-          "sizeInKb": 11,
-          "createdAt": "2013-05-12T09:40:55-04:00"
         }
       ],
       "expanded": true,
@@ -164,35 +156,12 @@
       "createdAt": "2013-05-12T09:02:32-04:00"
     },
     {
-      "name": "P1060066.JPG",
-      "url": "https://www.box.com/s/rij8icfj4aym6dpgulkt",
-      "attachmentType": "BOX_COM",
-      "mimeType": "image/jpeg",
-      "id": 1239274260588420,
-      "createdAt": "2013-05-12T08:54:52-04:00"
-    },
-    {
-      "name": "http://smartsheet.com",
-      "url": "http://smartsheet.com",
-      "attachmentType": "LINK",
-      "id": 1309643004766084,
-      "createdAt": "2013-05-12T08:52:25-04:00"
-    },
-    {
       "name": "gravatar william.jpeg",
       "attachmentType": "FILE",
       "mimeType": "image/jpeg",
       "id": 2750003237152644,
       "sizeInKb": 3,
       "createdAt": "2013-05-12T01:49:24-04:00"
-    },
-    {
-      "name": "gravatar william.jpeg",
-      "attachmentType": "FILE",
-      "mimeType": "image/jpeg",
-      "id": 572970214156164,
-      "sizeInKb": 3,
-      "createdAt": "2013-05-12T00:19:49-04:00"
     }
   ],
   "version": 16,

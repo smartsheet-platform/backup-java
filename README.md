@@ -53,6 +53,7 @@ Edit the properties file to set the following parameters:
 * "outputDir" (required) - desired output directory.  You can provide an absolute * path (e.g., "C:\some\directory") or a path relative to the directory in which the backup utility resides (e.g., "some\directory")
 * "zipOutputDir" (optional, default is false) - set to true to create a ziped archive of the outputDir
 * "downloadThreads" (optional, default is 4) - set to desired number of threads used to download attachments
+* "continueOnError" (optional, default false) - set to false to halt the backup execution on exception
 
 To execute the backup, run the following command "java -jar smartsheet-org-backup.jar".
 Since it's a runnable jar, you don't need to set classpath or copy other jars. Everything you need is in the runnable jar.

@@ -39,46 +39,53 @@ public class RestfulSmartsheetService implements SmartsheetService {
     private final String accessToken;
     private String assumedUserEmail;
 
-    public RestfulSmartsheetService(String accessToken) {
+    public RestfulSmartsheetService(final String accessToken) {
         this.accessToken = accessToken;
     }
 
-    public List<SmartsheetUser> getUsers() throws Exception {
-        String json = getJsonPayload(API_BASE_URL + "users");
+    @Override
+	public List<SmartsheetUser> getUsers() throws Exception {
+        final String json = getJsonPayload(API_BASE_URL + "users");
         return new JsonDeserializer<SmartsheetUser>().deserializeArray(json, SmartsheetUser.class);
     }
 
-    public SmartsheetHome getHome() throws Exception {
+    @Override
+	public SmartsheetHome getHome() throws Exception {
 
-        String json = getJsonPayload(API_BASE_URL + "home");
+        final String json = getJsonPayload(API_BASE_URL + "home");
         return new JsonDeserializer<SmartsheetHome>().deserialize(json, SmartsheetHome.class);
     }
 
-    public SmartsheetSheet getSheetDetails(long sheetId) throws Exception {
+    @Override
+	public SmartsheetSheet getSheetDetails(final long sheetId) throws Exception {
 
-        String json = getJsonPayload(API_BASE_URL + "sheet/" + sheetId + "?include=attachments,discussions");
+        final String json = getJsonPayload(API_BASE_URL + "sheet/" + sheetId + "?include=attachments,discussions");
         return new JsonDeserializer<SmartsheetSheet>().deserialize(json, SmartsheetSheet.class);
     }
 
-    public SmartsheetAttachment getAttachmentDetails(long attachmentId) throws Exception {
+    @Override
+	public SmartsheetAttachment getAttachmentDetails(final long attachmentId) throws Exception {
 
-        String json = getJsonPayload(API_BASE_URL + "attachment/" + attachmentId);
+        final String json = getJsonPayload(API_BASE_URL + "attachment/" + attachmentId);
         return new JsonDeserializer<SmartsheetAttachment>().deserialize(json, SmartsheetAttachment.class);
     }
 
-    public String getAccessToken() {
+    @Override
+	public String getAccessToken() {
         return accessToken;
     }
 
-    private String getJsonPayload(String url) throws IOException {
+    private String getJsonPayload(final String url) throws IOException {
         return HttpUtils.getJsonPayload(url, accessToken, assumedUserEmail);
     }
 
-    public void assumeUser(String assumedUserEmail) {
+    @Override
+	public void assumeUser(final String assumedUserEmail) {
         this.assumedUserEmail = assumedUserEmail;
     }
 
-    public String getAssumedUser() {
+    @Override
+	public String getAssumedUser() {
         return assumedUserEmail;
     }
 }

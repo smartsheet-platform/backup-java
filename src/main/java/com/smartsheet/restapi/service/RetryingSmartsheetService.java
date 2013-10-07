@@ -41,11 +41,12 @@ public class RetryingSmartsheetService implements SmartsheetService {
 
     private final SmartsheetService delegateService;
 
-    public RetryingSmartsheetService(SmartsheetService delegateService) {
+    public RetryingSmartsheetService(final SmartsheetService delegateService) {
         this.delegateService = delegateService;
     }
 
-    public List<SmartsheetUser> getUsers() throws Exception {
+    @Override
+	public List<SmartsheetUser> getUsers() throws Exception {
         ServiceUnavailableException finalException = null;
 
         for (int i = 0; i <= MAX_RETRIES; i++) {
@@ -53,7 +54,7 @@ public class RetryingSmartsheetService implements SmartsheetService {
             try {
                 return delegateService.getUsers();
 
-            } catch (ServiceUnavailableException e) {
+            } catch (final ServiceUnavailableException e) {
                 if (i < MAX_RETRIES)
                     sleepForDefinedInterval(i+1, "getUsers");
                 else
@@ -64,7 +65,8 @@ public class RetryingSmartsheetService implements SmartsheetService {
         throw finalException;
     }
 
-    public SmartsheetHome getHome() throws Exception {
+    @Override
+	public SmartsheetHome getHome() throws Exception {
         ServiceUnavailableException finalException = null;
 
         for (int i = 0; i <= MAX_RETRIES; i++) {
@@ -72,7 +74,7 @@ public class RetryingSmartsheetService implements SmartsheetService {
             try {
                 return delegateService.getHome();
 
-            } catch (ServiceUnavailableException e) {
+            } catch (final ServiceUnavailableException e) {
                 if (i < MAX_RETRIES)
                     sleepForDefinedInterval(i+1, "getHome");
                 else
@@ -83,7 +85,8 @@ public class RetryingSmartsheetService implements SmartsheetService {
         throw finalException;
     }
 
-    public SmartsheetSheet getSheetDetails(long sheetId) throws Exception {
+    @Override
+	public SmartsheetSheet getSheetDetails(final long sheetId) throws Exception {
         ServiceUnavailableException finalException = null;
 
         for (int i = 0; i <= MAX_RETRIES; i++) {
@@ -91,7 +94,7 @@ public class RetryingSmartsheetService implements SmartsheetService {
             try {
                 return delegateService.getSheetDetails(sheetId);
 
-            } catch (ServiceUnavailableException e) {
+            } catch (final ServiceUnavailableException e) {
                 if (i < MAX_RETRIES)
                     sleepForDefinedInterval(i+1, "getSheetDetails");
                 else
@@ -102,7 +105,8 @@ public class RetryingSmartsheetService implements SmartsheetService {
         throw finalException;
     }
 
-    public SmartsheetAttachment getAttachmentDetails(long attachmentId) throws Exception {
+    @Override
+	public SmartsheetAttachment getAttachmentDetails(final long attachmentId) throws Exception {
         ServiceUnavailableException finalException = null;
 
         for (int i = 0; i <= MAX_RETRIES; i++) {
@@ -110,7 +114,7 @@ public class RetryingSmartsheetService implements SmartsheetService {
             try {
                 return delegateService.getAttachmentDetails(attachmentId);
 
-            } catch (ServiceUnavailableException e) {
+            } catch (final ServiceUnavailableException e) {
                 if (i < MAX_RETRIES)
                     sleepForDefinedInterval(i+1, "getAttachmentDetails");
                 else
@@ -121,26 +125,29 @@ public class RetryingSmartsheetService implements SmartsheetService {
         throw finalException;
     }
 
-    public String getAccessToken() {
+    @Override
+	public String getAccessToken() {
         return delegateService.getAccessToken();
     }
 
-    private static void notifyIfRetry(int i) {
+    private static void notifyIfRetry(final int i) {
         if (i > 0)
             ProgressWatcher.notify("--- retry #" + i);
     }
 
-    public static void sleepForDefinedInterval(int retryNumber, String action) throws InterruptedException {
-        int sleepSecs = retryNumber * WAIT_INTERVAL_SECS;
+    public static void sleepForDefinedInterval(final int retryNumber, final String action) throws InterruptedException {
+        final int sleepSecs = retryNumber * WAIT_INTERVAL_SECS;
         ProgressWatcher.notify("503 (Service Unavailable) received for [" + action + "] - sleep " + sleepSecs + " secs before retry...");
         Thread.sleep(TimeUnit.SECONDS.toMillis(sleepSecs));
     }
 
-    public void assumeUser(String assumedUserEmail) {
+    @Override
+	public void assumeUser(final String assumedUserEmail) {
         delegateService.assumeUser(assumedUserEmail);
     }
 
-    public String getAssumedUser() {
+    @Override
+	public String getAssumedUser() {
         return delegateService.getAssumedUser();
     }
 }

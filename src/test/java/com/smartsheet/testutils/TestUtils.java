@@ -38,17 +38,21 @@ public class TestUtils {
     public static String getSampleGetAttachmentJsonResponse() throws IOException {
         return getSampleJsonPayload("smartsheet-get-attachment-response");
     }
+    
+    public static String getSampleGetAttachmentJsonResponseWithInvalidUrl() throws IOException {
+        return getSampleJsonPayload("smartsheet-get-attachment-invalid-download-url");
+    }
 
     public static String getSampleGetUsersJsonResponse() throws IOException {
         return getSampleJsonPayload("smartsheet-get-users-response");
     }
 
-    private static String getSampleJsonPayload(String fileName) throws IOException {
-        String filePath = "sample-payloads/" + fileName + ".json";
-        URL fileUrl = TestUtils.class.getResource(filePath);
-        BufferedReader fileReader = new BufferedReader(new InputStreamReader(fileUrl.openStream()));
+    private static String getSampleJsonPayload(final String fileName) throws IOException {
+        final String filePath = "sample-payloads/" + fileName + ".json";
+        final URL fileUrl = TestUtils.class.getResource(filePath);
+        final BufferedReader fileReader = new BufferedReader(new InputStreamReader(fileUrl.openStream()));
         try {
-            StringBuffer json = new StringBuffer();
+            final StringBuffer json = new StringBuffer();
             String line;
             while ((line = fileReader.readLine()) != null) {
                 json.append(line);
