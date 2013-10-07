@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import com.smartsheet.exceptions.CreateFileSystemItemException;
+import com.smartsheet.exceptions.SmartsheetGetSheetDetailsException;
 import com.smartsheet.restapi.model.SmartsheetAttachment;
 import com.smartsheet.restapi.model.SmartsheetNamedEntity;
 import com.smartsheet.restapi.model.SmartsheetSheet;
@@ -54,16 +55,20 @@ public class SheetSaver {
      * @param sheet the sheet to save
      * @param folder the existing local folder to save the sheet to
      * @return the {@link File} where the sheet was saved to
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws Exception
      */
-    public File save(SmartsheetSheet sheet, File folder) throws IOException, InterruptedException {
+    public File save(SmartsheetSheet sheet, File folder) throws Exception {
         File sheetFile = createFileFor(sheet, folder, XLS_EXTENSION);
         String url = "https://api.smartsheet.com/1.1/sheet/" + sheet.getId();
         String accessToken = apiService.getAccessToken();
         String userToAssume = apiService.getAssumedUser();
-        saveUrlToFile(url, sheetFile, accessToken, "application/vnd.ms-excel", userToAssume);
-        return sheetFile;
+        try {
+            saveUrlToFile(url, sheetFile, accessToken, "application/vnd.ms-excel", userToAssume);
+            return sheetFile;
+
+        } catch (Exception e) {
+            throw new SmartsheetGetSheetDetailsException(e, sheet.getName(), sheet.getId());
+        }
     }
 
     /**
