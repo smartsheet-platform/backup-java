@@ -61,20 +61,20 @@ public class ErrorContextualizingSmartsheetService implements SmartsheetService 
     }
 
     @Override
-    public SmartsheetSheet getSheetDetails(long sheetId) throws Exception {
+    public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
         try {
-            return delegateService.getSheetDetails(sheetId);
+            return delegateService.getSheetDetails(sheetName, sheetId);
         } catch (Exception e) {
-            throw new SmartsheetGetSheetDetailsException(e, sheetId);
+            throw new SmartsheetGetSheetDetailsException(e, sheetName, sheetId);
         }
     }
 
     @Override
-    public SmartsheetAttachment getAttachmentDetails(long attachmentId) throws Exception {
+    public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception {
         try {
-            return delegateService.getAttachmentDetails(attachmentId);
+            return delegateService.getAttachmentDetails(attachmentName, attachmentId, sheetName);
         } catch (Exception e) {
-            throw new SmartsheetGetAttachmentDetailsException(e, attachmentId);
+            throw new SmartsheetGetAttachmentDetailsException(e, attachmentName, attachmentId, sheetName);
         }
     }
 

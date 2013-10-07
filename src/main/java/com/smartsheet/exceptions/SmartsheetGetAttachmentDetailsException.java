@@ -20,12 +20,17 @@ public class SmartsheetGetAttachmentDetailsException extends AbstractSmartsheetG
 
     private static final long serialVersionUID = 1L;
 
-    public SmartsheetGetAttachmentDetailsException(Exception cause, long attachmentId) {
-        super(cause, attachmentId);
+    public SmartsheetGetAttachmentDetailsException(Exception cause, String attachmentName, long attachmentId, String sheetName) {
+        super(cause, attachmentName, attachmentId, sheetName);
     }
 
     @Override
     protected String getItemType() {
         return "attachment";
+    }
+
+    @Override
+    protected String getParentItemType() {
+        return "sheet";
     }
 }

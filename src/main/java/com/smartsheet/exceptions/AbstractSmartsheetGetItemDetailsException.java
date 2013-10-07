@@ -20,23 +20,47 @@ public abstract class AbstractSmartsheetGetItemDetailsException extends Abstract
 
     private static final long serialVersionUID = 1L;
 
+    private final String itemName;
     private final long itemId;
+    private final String parentItemName;
 
-    protected AbstractSmartsheetGetItemDetailsException(Exception cause, long itemId) {
+    protected AbstractSmartsheetGetItemDetailsException(Exception cause, String itemName, long itemId, String parentItemName) {
         super(cause);
+        this.itemName = itemName;
         this.itemId = itemId;
+        this.parentItemName = parentItemName;
+    }
+
+    public String getItemName() {
+        return itemName;
     }
 
     public long getItemId() {
         return itemId;
     }
 
+    public String getParentItemName() {
+        return parentItemName;
+    }
+
     @Override
     public String getMessage() {
         Throwable cause = getCause();
-        return String.format("Failed to get %s with id [%d] due to %s: %s",
-            getItemType(), itemId, cause.getClass().getSimpleName(), cause.getMessage());
+        String errorType = cause.getClass().getSimpleName();
+        String errorMessage = cause.getMessage();
+
+        if (getParentItemType() == null) // no parent
+            return String.format("Failed to get %s with name [%s] and id [%d] due to %s: %s",
+                getItemType(), itemName, itemId, errorType, errorMessage);
+
+        // else have parent
+        return String.format("Failed to get %s with name [%s] and id [%d] belonging to %s [%s] due to %s: %s",
+            getItemType(), itemName, itemId, getParentItemType(), parentItemName, errorType, errorMessage);
     }
 
     protected abstract String getItemType();
+
+    protected String getParentItemType() {
+        return null; // this item has no parent
+    }
 }

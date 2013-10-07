@@ -208,7 +208,7 @@ public class SmartsheetBackupService {
         ProgressWatcher.notify(String.format("Sheet [%s] saved as [%s]", sheet.getName(), sheetFile.getAbsolutePath()));
 
         // get sheet details and...
-        sheet = this.apiService.getSheetDetails(sheet.getId());
+        sheet = this.apiService.getSheetDetails(sheet.getName(), sheet.getId());
         // 1. collect sheet attachments
         List<SmartsheetAttachment> attachments = new ArrayList<SmartsheetAttachment>(sheet.getAttachments());
         // 2. collect sheet discussion attachments
@@ -234,7 +234,7 @@ public class SmartsheetBackupService {
         for (SmartsheetAttachment attachment : attachments) {
             String attachmentType = attachment.getAttachmentType();
             if (attachmentType.equals(FILE_ATTACHMENT_TYPE)) {
-                sheetSaver.saveAsynchronously(attachment, folder);
+                sheetSaver.saveAsynchronously(attachment, folder, sheet.getName());
             } else {
                 File summariesFile = sheetSaver.saveSummary(attachment, sheet, folder);
                 ProgressWatcher.notify(String.format("%s Attachment [%s] recorded in [%s]", attachmentType, attachment.getName(), summariesFile.getAbsolutePath()));

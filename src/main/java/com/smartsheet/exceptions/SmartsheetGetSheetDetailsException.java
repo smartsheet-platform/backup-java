@@ -20,8 +20,8 @@ public class SmartsheetGetSheetDetailsException extends AbstractSmartsheetGetIte
 
     private static final long serialVersionUID = 1L;
 
-    public SmartsheetGetSheetDetailsException(Exception cause, long sheetId) {
-        super(cause, sheetId);
+    public SmartsheetGetSheetDetailsException(Exception cause, String sheetName, long sheetId) {
+        super(cause, sheetName, sheetId, null);
     }
 
     @Override
