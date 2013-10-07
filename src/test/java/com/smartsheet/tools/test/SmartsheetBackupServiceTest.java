@@ -29,6 +29,7 @@ import com.smartsheet.exceptions.ServiceUnavailableException;
 import com.smartsheet.restapi.service.RetryingSmartsheetService;
 import com.smartsheet.tools.ParallelDownloadService;
 import com.smartsheet.tools.SmartsheetBackupService;
+import com.smartsheet.utils.PropertyUtils;
 
 /**
  * Note these are <i>integration</i> tests of the {@link SmartsheetBackupService}
@@ -48,6 +49,7 @@ public class SmartsheetBackupServiceTest {
     public void setUp() {
         parallelDownloadService = new ParallelDownloadService(
             DOWNLOAD_THREADS, ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES);
+        PropertyUtils.loadTestProperties();
     }
 
     /**
@@ -63,18 +65,65 @@ public class SmartsheetBackupServiceTest {
     public void backsUpSmartsheetHierarchyToLocalDir() throws Exception {
         printTestHeader("backsUpSmartsheetHierarchyToLocalDir");
 
-        SmartsheetBackupService backupService = new SmartsheetBackupService(
+        final SmartsheetBackupService backupService = new SmartsheetBackupService(
             new RetryingSmartsheetService(new StubSmartsheetService()),
             parallelDownloadService);
 
         backupToTempDir(backupService);
     }
 
+    /**
+     * This test is to verify test the continueOnError flag with true
+     * which means, if an error/exception occurs during the file saving/downloading
+     * it will continue with next file processing
+     * 
+     * To generate the error for testing, it uses StubSmartsheetServiceForError to read the payload
+     * json(smartsheet-get-attachment-invalid-download-url) with invalid url
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void backsUpSmartsheetToLocalDirWithContinueOnErrorTrue() throws Exception {
+    	//No need to set ContinueOnErrorTrue as default is true
+    	printTestHeader("backsUpSmartsheetToLocalDir with continueOnErrorTrue as true[default]");
+
+        final SmartsheetBackupService backupService = new SmartsheetBackupService(
+            new RetryingSmartsheetService(new StubSmartsheetServiceForError()),
+            parallelDownloadService);
+        
+        backupToTempDir(backupService);
+    }
+
+    /**
+     * This test is to verify test the continueOnError flag with false
+     * which means, if an error/exception occurs during the file saving/downloading
+     * it will halt the execution and exit. 
+     
+     * To generate the error for testing, it uses StubSmartsheetServiceForError to read the payload
+     * json(smartsheet-get-attachment-invalid-download-url) with invalid url
+     * 
+     * expects ServiceUnavailableException
+     * 
+     * @throws Exception
+     */
+    @Test(expected = ServiceUnavailableException.class)
+    public void backsUpSmartsheetToLocalDirWithContinueOnErrorFalse() throws Exception {
+    	//set the property to false, default is true
+        printTestHeader("backsUpSmartsheetToLocalDir with continueOnErrorTrue as false");
+        PropertyUtils.setProperty("continueOnError", "false");
+
+        final SmartsheetBackupService backupService = new SmartsheetBackupService(
+            new RetryingSmartsheetService(new StubSmartsheetServiceForError()),
+            parallelDownloadService);
+        
+        backupToTempDir(backupService);
+    }
+    
     @Test
     public void backsUpSmartsheetHierarchyToLocalDirRecoveringFromServiceUnavailable() throws Exception {
         printTestHeader("backsUpSmartsheetHierarchyToLocalDirRecoveringFromServiceUnavailable");
 
-        SmartsheetBackupService backupService = new SmartsheetBackupService(
+        final SmartsheetBackupService backupService = new SmartsheetBackupService(
             new RetryingSmartsheetService(new StubRecoveringServiceUnavailableSmartsheetService()),
             parallelDownloadService);
 
@@ -85,7 +134,7 @@ public class SmartsheetBackupServiceTest {
     public void retriesOnServiceUnavailableExceptionsUntilMaxRetries() throws Exception {
         printTestHeader("retriesOnServiceUnavailableExceptionsUntilMaxRetries");
 
-        SmartsheetBackupService backupService = new SmartsheetBackupService(
+        final SmartsheetBackupService backupService = new SmartsheetBackupService(
             new RetryingSmartsheetService(new StubServiceUnavailableSmartsheetService()),
             parallelDownloadService);
 
@@ -94,14 +143,14 @@ public class SmartsheetBackupServiceTest {
 
     // helpers
 
-    private static void printTestHeader(String testName) {
+    private static void printTestHeader(final String testName) {
         System.out.println("-------------------- TEST: " + testName  + " --------------------");
     }
 
-    private void backupToTempDir(SmartsheetBackupService backupService) throws Exception {
-        Date timeBeforeBackup = new Date();
+    private void backupToTempDir(final SmartsheetBackupService backupService) throws Exception {
+        final Date timeBeforeBackup = new Date();
 
-        File backupFolder = new File(
+        final File backupFolder = new File(
             System.getProperty("java.io.tmpdir"),
             getClass().getSimpleName() + "-" + System.currentTimeMillis());
 
