@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import com.smartsheet.restapi.service.ErrorContextualizingSmartsheetService;
 import com.smartsheet.restapi.service.RestfulSmartsheetService;
 import com.smartsheet.restapi.service.RetryingSmartsheetService;
 import com.smartsheet.restapi.service.SmartsheetService;
@@ -45,6 +46,8 @@ public class SmartsheetBackupTool {
 
     private static final int SUCCESS_EXIT_CODE = 0;
     private static final int FAILURE_EXIT_CODE = -1;
+
+    private static final ProgressWatcher progressWatcher = ProgressWatcher.getInstance();
 
     /**
      * The entry point of the program which reads properties, instantiates
@@ -72,9 +75,11 @@ public class SmartsheetBackupTool {
             int allDownloadsDoneTimeout = getOptionalProp(props, "allDownloadsDoneTimeout", DEFAULT_ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES, 0);
 
             // 2. instantiate services
-            SmartsheetService apiService = new RetryingSmartsheetService(
-                // the RetryingSmartsheetService wraps the RestfulSmartsheetService:
-                new RestfulSmartsheetService(accessToken));
+            SmartsheetService apiService = new ErrorContextualizingSmartsheetService(
+                // the ErrorContextualizingSmartsheetService wraps the RetryingSmartsheetService:
+                new RetryingSmartsheetService(
+                    // the RetryingSmartsheetService wraps the RestfulSmartsheetService:
+                    new RestfulSmartsheetService(accessToken)));
 
             ParallelDownloadService parallelDownloadService = new ParallelDownloadService(
                 downloadThreads, allDownloadsDoneTimeout);
@@ -95,14 +100,21 @@ public class SmartsheetBackupTool {
 
                 // 5. tell user how long the backup took and how many users were backed up
                 String timeSummary = computeTimeSummary(startTime);
-                ProgressWatcher.getInstance().notify("*** Org backup done -> [" + numberUsers + "] users total backed up in " + timeSummary + " ***");
+                progressWatcher.notify("*** Org backup done -> [" + numberUsers + "] users total backed up in " + timeSummary + " ***");
+
+                // 6. tell user if there were any errors (in the scenario where they wanted to continue on error)
+                int errorCount = progressWatcher.getErrorCount();
+                if (errorCount > 0)
+                    progressWatcher.notify(String.format(
+                        "*** NOTE: %d ERRORS occurred - please consult log file [%s]", errorCount, progressWatcher.getErrorLogFile()) + '\n' +
+                        "    for details of what was skipped and which may require retry or manual recovery");
 
             } else
                 exitCode = FAILURE_EXIT_CODE;
 
         } catch (Exception e) {
             // on error tell the user what was the error
-            ProgressWatcher.getInstance().notifyError(e);
+            progressWatcher.notifyError(e);
 
             exitCode = FAILURE_EXIT_CODE;
         }
@@ -115,7 +127,7 @@ public class SmartsheetBackupTool {
         File outputDir = new File(outputDirPath);
         zipDirectory(outputDir, new File(zipFilePath));
         deleteFolder(outputDir);
-        ProgressWatcher.getInstance().notify("Zipped output dir to: " + new File(zipFilePath).getAbsolutePath());
+        progressWatcher.notify("Zipped output dir to: " + new File(zipFilePath).getAbsolutePath());
     }
 
     private static String computeTimeSummary(long startTime) {
@@ -137,7 +149,7 @@ public class SmartsheetBackupTool {
         if (!file.isFile())
             throw new FileNotFoundException("File not found: " + file.getAbsolutePath());
 
-        ProgressWatcher.getInstance().notify("Using properties file: " + file.getAbsolutePath());
+        progressWatcher.notify("Using properties file: " + file.getAbsolutePath());
 
         FileReader reader = new FileReader(file);
         try {

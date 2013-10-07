@@ -55,4 +55,11 @@ public class ProgressWatcher {
     public int getErrorCount() {
         return errorCount;
     }
+
+    public String getErrorLogFile() {
+        if (errorCount > 0)
+            return ""; // TODO
+
+        return null;
+    }
 }
