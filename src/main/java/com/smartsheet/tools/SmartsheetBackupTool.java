@@ -43,11 +43,13 @@ public class SmartsheetBackupTool {
     private final static int DEFAULT_DOWNLOAD_THREADS = 4; // optimal if 4 cores
     private final static int DEFAULT_ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES = 2; // matches Smartsheet attachment URL expiry
     private static final boolean DEFAULT_ZIP_OUTPUT_DIR_FLAG = false;
+    private static final boolean DEFAULT_CONTINUE_ON_ERROR_FLAG = false;
 
     private static final int SUCCESS_EXIT_CODE = 0;
     private static final int FAILURE_EXIT_CODE = -1;
 
     private static final ProgressWatcher progressWatcher = ProgressWatcher.getInstance();
+    private static final ConfigHolder configHolder = ConfigHolder.getInstance();
 
     /**
      * The entry point of the program which reads properties, instantiates
@@ -70,9 +72,13 @@ public class SmartsheetBackupTool {
             String accessToken = getRequiredProp(props, "accessToken");
             String outputDir = getRequiredProp(props, "outputDir");
             boolean zipOutputDir = getOptionalProp(props, "zipOutputDir", DEFAULT_ZIP_OUTPUT_DIR_FLAG);
+            boolean continueOnError = getOptionalProp(props, "continueOnError", DEFAULT_CONTINUE_ON_ERROR_FLAG);
 
             int downloadThreads = getOptionalProp(props, "downloadThreads", DEFAULT_DOWNLOAD_THREADS, 1);
             int allDownloadsDoneTimeout = getOptionalProp(props, "allDownloadsDoneTimeout", DEFAULT_ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES, 0);
+
+            // share some of the properties globally
+            configHolder.setContinueOnError(continueOnError);
 
             // 2. instantiate services
             SmartsheetService apiService = new ErrorContextualizingSmartsheetService(
@@ -92,7 +98,7 @@ public class SmartsheetBackupTool {
             int numberUsers = backupService.backupOrgTo(new File(outputDir));
 
             boolean allDownloadJobsDone = parallelDownloadService.waitTillAllDownloadJobsDone();
-            if (allDownloadJobsDone || ConfigHolder.getInstance().isContinueOnError()) {
+            if (allDownloadJobsDone || configHolder.isContinueOnError()) {
 
                 // 4. if requested, zip up the backup folder which is then deleted
                 if (zipOutputDir)
