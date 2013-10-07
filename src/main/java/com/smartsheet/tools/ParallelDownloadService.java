@@ -20,12 +20,18 @@ import static com.smartsheet.utils.HttpUtils.saveUrlToFile;
 
 import java.io.File;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.smartsheet.exceptions.ServiceUnavailableException;
+import com.smartsheet.restapi.model.SmartsheetAttachment;
+import com.smartsheet.restapi.service.SmartsheetService;
 import com.smartsheet.utils.ProgressWatcher;
+import com.smartsheet.utils.PropertyUtils;
 
 /**
  * A service which downloads files from the Internet in parallel (i.e.,
@@ -56,7 +62,7 @@ public class ParallelDownloadService {
      *          the {@link #waitTillAllDownloadJobsDone} method is called). A
      *          value of one or greater is expected.
      */
-    public ParallelDownloadService(int numberOfThreads, long allJobsDoneTimeoutMinutes)
+    public ParallelDownloadService(final int numberOfThreads, final long allJobsDoneTimeoutMinutes)
             throws IllegalArgumentException {
 
         executor = Executors.newFixedThreadPool(numberOfThreads);
@@ -64,51 +70,81 @@ public class ParallelDownloadService {
     }
 
     /**
-     * Posts an asynchronous ("parallel") download job.
+     * Posts an asynchronous ("parallel") download job. 
      *
-     * @param sourceUrl
-     *          The URL of the source file on the Internet to download.
+     * @param sourceId
+     *          The id of the attachment source file . 
+     *          Use this sourceId to get the attachment details like source file URL on the Internet to download.
      *
      * @param targetFile
      *          The local file to download the source to. The file will be
      *          created if it doesn't exist, and overwritten if it does.
-     *
-     * @param postedMessage
-     *          The message to log when the job has been posted.
-     *
-     * @param completedMessage
-     *          The message to log when the job has been completed.
+
+     * @param apiService
+     * 			The interfacing service to get the attachment details.
+     * @param sheetName 
+     * @throws Exception 
+     * 
+     * 			 
      */
     public void postAsynchronousDownloadJob(
-            final String sourceUrl, final File targetFile,
-            final String postedMessage, final String completedMessage) {
-
-        ProgressWatcher.notify(postedMessage);
+            final long sourceId, final File targetFile,
+            final SmartsheetService apiService,final String sheetName) throws Exception {
 
         // Submit a new job, returning immediately. The job will be queued until
         // a thread in the pool becomes available to handle it.
-        executor.submit(new Callable<File>() {
+        final Future<File> futureResponse = executor.submit(new Callable<File>() {
 
             // The logic which is executed asynchronously when a thread becomes
             // available to handle the job.
-            public File call() throws Exception {
-                try {
-                    saveUrlToFile(sourceUrl, targetFile);
+            @Override
+			public File call() throws Exception {
 
+            	//Get the attachment details from the sourceFileId using apiService
+            	final SmartsheetAttachment attachment = apiService.getAttachmentDetails(sourceId);
+            	
+            	final String attachmentName = attachment.getName();
+            	
+            	//Get the source Url of the attachment
+            	final String sourceUrl = attachment.getUrl();
+
+            	final String postedMessage = String.format("[UserId : %s] :  Download request for sheet[%s] Attachment[%s]", apiService.getAssumedUser(), sheetName, attachmentName);
+            	final String completedMessage = String.format("[UserId : %s] : ..Sheet[%s] Attachment [%s] downloaded", apiService.getAssumedUser(), sheetName, targetFile.getAbsolutePath());
+            	try {
+
+                    ProgressWatcher.notify(postedMessage);
+					saveUrlToFile(sourceUrl, targetFile);
                     ProgressWatcher.notify(completedMessage);
 
                     completions.incrementAndGet();
                     return targetFile;
 
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     failures.incrementAndGet();
-
-                    ProgressWatcher.notifyError(String.format("[%s: %s] downloading from [%s] to [%s]",
-                        e.getClass().getSimpleName(), e.getLocalizedMessage(), sourceUrl, targetFile));
-                    throw e;
+					ProgressWatcher.notifyError(String.format("[UserId : %s] : Error while downloading sheet[%s] attachment[%s]",
+	                        apiService.getAssumedUser(), sheetName, attachmentName));
+                    if(!PropertyUtils.isContinueOnError()){
+         				throw e;
+         			}
+                    return null;
                 }
             }});
-
+        try {
+			futureResponse.get();
+		} catch (final InterruptedException e) {
+			ProgressWatcher.notifyError(String.format("[UserId : %s] : Error while downloading sheet[%s] attachments ",
+                    apiService.getAssumedUser(), sheetName));
+            if(!PropertyUtils.isContinueOnError()){
+ 				throw new ServiceUnavailableException(e.getMessage());
+ 			}
+		} catch (final ExecutionException e) {
+			ProgressWatcher.notifyError(String.format("[UserId : %s] : Error while downloading sheet[%s] attachments ",
+                    apiService.getAssumedUser(), sheetName));
+            if(!PropertyUtils.isContinueOnError()){
+            	throw new ServiceUnavailableException(e.getMessage());
+ 			}
+		}
+       
         // This is executed immediately after the job is posted.
         posts.incrementAndGet();
     }
@@ -132,14 +168,14 @@ public class ParallelDownloadService {
         executor.shutdown();
 
         // prepare to wait
-        String timeUnits = allJobsDoneTimeoutMinutes <= 1 ? "minute" : "minutes";
+        final String timeUnits = allJobsDoneTimeoutMinutes <= 1 ? "minute" : "minutes";
         ProgressWatcher.notify("Wait up to " + allJobsDoneTimeoutMinutes + " " + timeUnits + " for any outstanding parallel download jobs...");
 
         // wait...
         boolean allDone = false;
         try {
             allDone = executor.awaitTermination(allJobsDoneTimeoutMinutes, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             // user or system interrupted the wait
         }
 
