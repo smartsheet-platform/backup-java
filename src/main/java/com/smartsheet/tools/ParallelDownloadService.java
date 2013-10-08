@@ -131,7 +131,7 @@ public class ParallelDownloadService {
             return true; // all jobs completed, no need to wait
 
         if (failures.intValue() == posts.intValue()) {
-            ProgressWatcher.getInstance().notifyError("All " + posts + " parallel download jobs failed (see previous logs)");
+            ProgressWatcher.getInstance().notify("***WARNING*** All " + posts + " parallel download jobs failed (see previous logs)");
             return false; // all jobs failed, also no need to wait
         }
 
@@ -159,7 +159,12 @@ public class ParallelDownloadService {
         // check if all completed (completions equal posts)
         allDone = completions.intValue() == posts.intValue();
         if (!allDone)
-            ProgressWatcher.getInstance().notify("***WARNING*** " + (posts.intValue() - completions.intValue()) + " parallel download jobs didn't complete");
+            ProgressWatcher.getInstance().notify("***WARNING*** " + failures.intValue() + " of " + posts.intValue() + " parallel download jobs didn't complete (see previous logs)");
+
+        // since now shutdown, reset counters
+        posts.set(0);
+        completions.set(0);
+        failures.set(0);
 
         return allDone;
     }
