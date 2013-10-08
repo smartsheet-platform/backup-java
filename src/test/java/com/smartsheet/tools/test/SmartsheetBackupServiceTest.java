@@ -120,6 +120,7 @@ public class SmartsheetBackupServiceTest {
         if (ProgressWatcher.getInstance().getErrorCount() > 0) {
             String errorLogFile = ProgressWatcher.getInstance().getErrorLogFile();
             assertNotNull(errorLogFile);
+            parallelDownloadService.waitTillAllDownloadJobsDone();
             System.out.println("-------------------- check error log file: " + errorLogFile  + " --------------------");
         }
     }
