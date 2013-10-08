@@ -31,6 +31,8 @@ import com.smartsheet.restapi.service.SmartsheetService;
  */
 public class StubBadConnectionSmartsheetService extends StubSmartsheetService {
 
+    private static final String INVALID_S3_URL = "https://s3.amazonaws.com/SmartsheetBx/73de1644e44ad916e6b9e937cec2d";
+
     @Override
     public SmartsheetHome getHome() throws Exception {
 
@@ -55,7 +57,16 @@ public class StubBadConnectionSmartsheetService extends StubSmartsheetService {
         if (isConnectionCurrentlyBad())
             throw fakeConnectionException();
 
-        return super.getAttachmentDetails(attachmentName, attachmentId, sheetName);
+        SmartsheetAttachment attachmentDetails = super.getAttachmentDetails(attachmentName, attachmentId, sheetName);
+
+        if (isConnectionCurrentlyBad()) {
+            // fake the connection being bad when the caller tries to retrieve
+            // the attachment referenced in the attachment details by returning an
+            // invalid S3 URL
+            attachmentDetails.setUrl(INVALID_S3_URL);
+        }
+
+        return attachmentDetails;
     }
 
     private static boolean isConnectionCurrentlyBad() {
