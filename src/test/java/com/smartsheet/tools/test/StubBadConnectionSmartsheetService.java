@@ -33,6 +33,8 @@ public class StubBadConnectionSmartsheetService extends StubSmartsheetService {
 
     private static final String INVALID_S3_URL = "https://s3.amazonaws.com/SmartsheetBx/73de1644e44ad916e6b9e937cec2d";
 
+    protected boolean simulateRandomConnectionErrors = true;
+
     @Override
     public SmartsheetHome getHome() throws Exception {
 
@@ -69,11 +71,14 @@ public class StubBadConnectionSmartsheetService extends StubSmartsheetService {
         return attachmentDetails;
     }
 
-    private static boolean isConnectionCurrentlyBad() {
-        return new Random().nextBoolean();
+    private boolean isConnectionCurrentlyBad() {
+        if (simulateRandomConnectionErrors)
+            return new Random().nextBoolean();
+
+        return false;
     }
 
-    private static IOException fakeConnectionException() {
+    protected static IOException fakeConnectionException() {
         return new IOException("Connection refused");
     }
 }
