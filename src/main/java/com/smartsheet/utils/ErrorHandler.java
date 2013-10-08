@@ -31,11 +31,6 @@ public class ErrorHandler {
      * rethrowing the {@link Exception} if not.
      */
     public static void handle(Exception exception, String currentUser) throws Exception {
-        if (!ConfigHolder.getInstance().isContinueOnError())
-            throw exception;
-
-        // else isContinueOnError, so handle the error and return
-
         String exceptionType = exception.getClass().getSimpleName();
         String exceptionMessage = exception.getLocalizedMessage();
         if (exceptionMessage == null)
@@ -45,5 +40,9 @@ public class ErrorHandler {
             currentUser, exceptionType, exceptionMessage);
 
         ProgressWatcher.getInstance().notifyError(error);
+
+        // if continueOnError is not set, then instead of continuing, just throw the exception again
+        if (!ConfigHolder.getInstance().isContinueOnError())
+            throw exception;
     }
 }
