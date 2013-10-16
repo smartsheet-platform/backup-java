@@ -31,29 +31,36 @@ import com.smartsheet.restapi.service.SmartsheetService;
  */
 public class StubServiceUnavailableSmartsheetService implements SmartsheetService {
 
+    @Override
     public List<SmartsheetUser> getUsers() throws Exception {
         throw new ServiceUnavailableException();
     }
 
+    @Override
     public SmartsheetHome getHome() throws Exception {
         throw new ServiceUnavailableException();
     }
 
-    public SmartsheetSheet getSheetDetails(long sheetId) throws Exception {
+    @Override
+    public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
         throw new ServiceUnavailableException();
     }
 
-    public SmartsheetAttachment getAttachmentDetails(long attachmentId) throws Exception {
+    @Override
+    public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception {
         throw new ServiceUnavailableException();
     }
 
+    @Override
     public String getAccessToken() {
         return null;
     }
 
+    @Override
     public void assumeUser(String assumedUserEmail) {
     }
 
+    @Override
     public String getAssumedUser() {
         return null;
     }

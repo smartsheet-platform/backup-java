@@ -16,7 +16,9 @@
 **/
 package com.smartsheet.tools.test;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.Date;
@@ -26,9 +28,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.smartsheet.exceptions.ServiceUnavailableException;
+import com.smartsheet.exceptions.SmartsheetGetSheetDetailsException;
+import com.smartsheet.restapi.service.ErrorContextualizingSmartsheetService;
 import com.smartsheet.restapi.service.RetryingSmartsheetService;
 import com.smartsheet.tools.ParallelDownloadService;
 import com.smartsheet.tools.SmartsheetBackupService;
+import com.smartsheet.utils.ConfigHolder;
+import com.smartsheet.utils.ProgressWatcher;
 
 /**
  * Note these are <i>integration</i> tests of the {@link SmartsheetBackupService}
@@ -56,7 +62,14 @@ public class SmartsheetBackupServiceTest {
     @After
     public void tearDown() {
         // assert all downloads done after wait
-        assertTrue(parallelDownloadService.waitTillAllDownloadJobsDone());
+        boolean allDownloadJobsDone = parallelDownloadService.waitTillAllDownloadJobsDone();
+
+        if (!ConfigHolder.getInstance().isContinueOnError())
+            assertTrue(allDownloadJobsDone);
+        // else isContinueOnError, so acceptable if not all jobs done due to errors
+
+        // reset
+        setContinueOnError(false);
     }
 
     @Test
@@ -92,10 +105,89 @@ public class SmartsheetBackupServiceTest {
         backupToTempDir(backupService);
     }
 
+    // random test (simulates random network errors for comprehensive test coverage of scenarios)
+    @Test
+    public void continuesOnRandomNetworkErrorsIfConfigured() throws Exception {
+        printTestHeader("continuesOnExceptions");
+
+        ConfigHolder.getInstance().setContinueOnError(true);
+        ProgressWatcher.getInstance().setLogErrorsToFile(true);
+
+        SmartsheetBackupService backupService = new SmartsheetBackupService(
+            new ErrorContextualizingSmartsheetService(new StubBadConnectionSmartsheetService()),
+            parallelDownloadService);
+
+        backupToTempDir(backupService);
+
+        if (ProgressWatcher.getInstance().getErrorCount() > 0) {
+            String errorLogFile = ProgressWatcher.getInstance().getErrorLogFile();
+            assertNotNull(errorLogFile);
+            printErrorLogFilePathWhenDone(errorLogFile);
+        }
+    }
+
+    @Test
+    public void continuesOnSpecificRequestErrorIfConfigured() throws Exception {
+        printTestHeader("continuesOnSpecificRequestErrorIfConfigured");
+
+        setContinueOnError(true);
+
+        StubSpecificRequestFailureSmartsheetService stubSmartsheetService =
+            new StubSpecificRequestFailureSmartsheetService();
+        stubSmartsheetService.setMakeGetSheetRequestFail(true);
+
+        SmartsheetBackupService backupService = new SmartsheetBackupService(
+            new ErrorContextualizingSmartsheetService(stubSmartsheetService),
+            parallelDownloadService);
+
+        backupToTempDir(backupService);
+
+        assertTrue(ProgressWatcher.getInstance().getErrorCount() > 0);
+        String errorLogFile = ProgressWatcher.getInstance().getErrorLogFile();
+        assertNotNull(errorLogFile);
+        printErrorLogFilePathWhenDone(errorLogFile);
+    }
+
+    @Test
+    public void doesNotContinueOnSpecificRequestErrorIfNotConfigured() {
+        printTestHeader("doesNotContinueOnSpecificRequestErrorIfNotConfigured");
+
+        // setContinueOnError(false); - not needed because default value is already false
+
+        StubSpecificRequestFailureSmartsheetService stubSmartsheetService =
+            new StubSpecificRequestFailureSmartsheetService();
+        stubSmartsheetService.setMakeGetSheetRequestFail(true);
+
+        SmartsheetBackupService backupService = new SmartsheetBackupService(
+            new ErrorContextualizingSmartsheetService(stubSmartsheetService),
+            parallelDownloadService);
+
+        try {
+            backupToTempDir(backupService);
+            fail("Did not get exception even though continueOnError false");
+
+        } catch (Exception e) {
+            assertTrue(e.getClass().equals(SmartsheetGetSheetDetailsException.class));
+            assertTrue(ProgressWatcher.getInstance().getErrorCount() > 0);
+        }
+    }
+
     // helpers
+
+    private static void setContinueOnError(boolean continueOnError) {
+        ConfigHolder.getInstance().setContinueOnError(continueOnError);
+        // the backup tool does setLogErrorsToFile true if continueOnError is true,
+        // so simulate that behaviour by having the test do the same here:
+        ProgressWatcher.getInstance().setLogErrorsToFile(continueOnError);
+    }
 
     private static void printTestHeader(String testName) {
         System.out.println("-------------------- TEST: " + testName  + " --------------------");
+    }
+
+    private void printErrorLogFilePathWhenDone(String errorLogFile) {
+        parallelDownloadService.waitTillAllDownloadJobsDone();
+        System.out.println("-------------------- check error log file: " + errorLogFile  + " --------------------");
     }
 
     private void backupToTempDir(SmartsheetBackupService backupService) throws Exception {

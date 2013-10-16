@@ -52,17 +52,17 @@ public class StubRecoveringServiceUnavailableSmartsheetService extends StubSmart
     }
 
     @Override
-    public SmartsheetSheet getSheetDetails(long sheetId) throws Exception {
+    public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
         if (countGetSheetDetails.getAndIncrement() == 0)
             throw new ServiceUnavailableException();
-        return super.getSheetDetails(sheetId);
+        return super.getSheetDetails(sheetName, sheetId);
     }
 
     @Override
-    public SmartsheetAttachment getAttachmentDetails(long attachmentId) throws Exception {
+    public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception {
         if (countGetAttachmentDetails.getAndIncrement() == 0)
             throw new ServiceUnavailableException();
-        return super.getAttachmentDetails(attachmentId);
+        return super.getAttachmentDetails(attachmentName, attachmentId, sheetName);
     }
 
     @Override

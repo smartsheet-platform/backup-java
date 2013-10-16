@@ -1,3 +1,4 @@
+*.log
 *.class
 .settings
 .project
