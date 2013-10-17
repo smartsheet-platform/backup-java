@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 import com.smartsheet.exceptions.CreateFileSystemItemException;
+import com.smartsheet.exceptions.SmartsheetGetSheetDetailsException;
 import com.smartsheet.restapi.model.SmartsheetAttachment;
 import com.smartsheet.restapi.model.SmartsheetNamedEntity;
 import com.smartsheet.restapi.model.SmartsheetSheet;
@@ -54,16 +55,20 @@ public class SheetSaver {
      * @param sheet the sheet to save
      * @param folder the existing local folder to save the sheet to
      * @return the {@link File} where the sheet was saved to
-     * @throws IOException
-     * @throws InterruptedException 
+     * @throws Exception
      */
-    public File save(SmartsheetSheet sheet, File folder) throws IOException, InterruptedException {
+    public File save(SmartsheetSheet sheet, File folder) throws Exception {
         File sheetFile = createFileFor(sheet, folder, XLS_EXTENSION);
         String url = "https://api.smartsheet.com/1.1/sheet/" + sheet.getId();
         String accessToken = apiService.getAccessToken();
         String userToAssume = apiService.getAssumedUser();
-        saveUrlToFile(url, sheetFile, accessToken, "application/vnd.ms-excel", userToAssume);
-        return sheetFile;
+        try {
+            saveUrlToFile(url, sheetFile, accessToken, "application/vnd.ms-excel", userToAssume);
+            return sheetFile;
+
+        } catch (Exception e) {
+            throw new SmartsheetGetSheetDetailsException(e, sheet.getName(), sheet.getId());
+        }
     }
 
     /**
@@ -72,23 +77,24 @@ public class SheetSaver {
      *
      * @param attachment the file attachment to save
      * @param folder the existing local folder to save the file attachment to
+     * @param sheetName the name of the sheet the attachment belongs to
      * @throws Exception
      */
-    public void saveAsynchronously(SmartsheetAttachment attachment, File folder) throws Exception {
+    public void saveAsynchronously(SmartsheetAttachment attachment, File folder, String sheetName) throws Exception {
         File attachmentFile = createFileFor(attachment, folder, null);
         String filePath = attachmentFile.getAbsolutePath();
-
-        attachment = apiService.getAttachmentDetails(attachment.getId());
 
         String attachmentType = attachment.getAttachmentType();
         String attachmentName = attachment.getName();
 
         String postedMessage = String.format(">> Download request for %s Attachment [%s]", attachmentType, attachmentName);
         String completedMessage = String.format("...%s Attachment [%s] downloaded as [%s]", attachmentType, attachmentName, filePath);
+        String errorContext = String.format("%s Attachment [%s] in Sheet [%s]", attachmentType, attachmentName, sheetName);
 
         parallelDownloadService.postAsynchronousDownloadJob(
-            attachment.getUrl(), attachmentFile,
-            postedMessage, completedMessage);
+            new SmartsheetAttachmentContentSource(apiService, attachment, sheetName),
+            attachmentFile,
+            postedMessage, completedMessage, errorContext);
     }
 
     /**
@@ -106,7 +112,7 @@ public class SheetSaver {
         String fileName = getUniqueFileNameForItemInFolder(item, folder, numberSuffix, extension);
 
         File newFile = new File(folder, fileName);
-        ProgressWatcher.notify(String.format("Creating new file: [%s]", newFile.getCanonicalPath()));
+        ProgressWatcher.getInstance().notify(String.format("Creating new file: [%s]", newFile.getCanonicalPath()));
         if (!newFile.createNewFile())
             throw new CreateFileSystemItemException(newFile);
         return newFile;
@@ -120,7 +126,7 @@ public class SheetSaver {
             SmartsheetNamedEntity item, File folder, int numberSuffix, String extension) {
 
         String itemName = item.getName();
-        
+
         String fileNamePart;
         String extensionPart = extension;
         if (extensionPart != null) // extension supplied, so fileNamePart is just the itemName
@@ -135,13 +141,13 @@ public class SheetSaver {
                 extensionPart = "";
             }
         }
-        fileNamePart = scrubName(fileNamePart); 
+        fileNamePart = scrubName(fileNamePart);
         String fullFileName = fileNamePart + extensionPart;
 
         if(fullFileName.length()==0)
             throw new IllegalStateException(
                     "File Name " + fullFileName + " results in a empty fileName!");
-        
+
         if (!fileNameExistsInFolder(fullFileName, folder))
             return fullFileName;
 
@@ -154,7 +160,7 @@ public class SheetSaver {
     }
 
     public static String scrubName(String fileName) {
-		
+
 		return fileName.replaceAll("[\\\\/:\\*?\"<>|]+", "_");
 	}
 

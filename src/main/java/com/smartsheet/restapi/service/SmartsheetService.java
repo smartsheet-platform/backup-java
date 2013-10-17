@@ -32,9 +32,9 @@ public interface SmartsheetService {
 
     SmartsheetHome getHome() throws Exception;
 
-    SmartsheetSheet getSheetDetails(long sheetId) throws Exception;
+    SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception;
 
-    SmartsheetAttachment getAttachmentDetails(long attachmentId) throws Exception;
+    SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception;
 
     String getAccessToken();
 

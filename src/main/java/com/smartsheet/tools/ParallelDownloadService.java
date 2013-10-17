@@ -66,8 +66,8 @@ public class ParallelDownloadService {
     /**
      * Posts an asynchronous ("parallel") download job.
      *
-     * @param sourceUrl
-     *          The URL of the source file on the Internet to download.
+     * @param source
+     *          The source of the file on the Internet to download.
      *
      * @param targetFile
      *          The local file to download the source to. The file will be
@@ -78,12 +78,17 @@ public class ParallelDownloadService {
      *
      * @param completedMessage
      *          The message to log when the job has been completed.
+     *
+     * @param errorContext
+     *          Textual context to add to the error message logged when the job has failed.
      */
     public void postAsynchronousDownloadJob(
-            final String sourceUrl, final File targetFile,
-            final String postedMessage, final String completedMessage) {
+            final InternetContentSource source,
+            final File targetFile,
+            final String postedMessage, final String completedMessage,
+            final String errorContext) {
 
-        ProgressWatcher.notify(postedMessage);
+        ProgressWatcher.getInstance().notify(postedMessage);
 
         // Submit a new job, returning immediately. The job will be queued until
         // a thread in the pool becomes available to handle it.
@@ -91,11 +96,13 @@ public class ParallelDownloadService {
 
             // The logic which is executed asynchronously when a thread becomes
             // available to handle the job.
+            @Override
             public File call() throws Exception {
+                String sourceUrl = source.getURL();
                 try {
                     saveUrlToFile(sourceUrl, targetFile);
 
-                    ProgressWatcher.notify(completedMessage);
+                    ProgressWatcher.getInstance().notify(completedMessage);
 
                     completions.incrementAndGet();
                     return targetFile;
@@ -103,8 +110,8 @@ public class ParallelDownloadService {
                 } catch (Exception e) {
                     failures.incrementAndGet();
 
-                    ProgressWatcher.notifyError(String.format("[%s: %s] downloading from [%s] to [%s]",
-                        e.getClass().getSimpleName(), e.getLocalizedMessage(), sourceUrl, targetFile));
+                    ProgressWatcher.getInstance().notifyError(String.format("[%s: %s] downloading from [%s] to [%s] for %s",
+                        e.getClass().getSimpleName(), e.getLocalizedMessage(), sourceUrl, targetFile, errorContext));
                     throw e;
                 }
             }});
@@ -124,7 +131,7 @@ public class ParallelDownloadService {
             return true; // all jobs completed, no need to wait
 
         if (failures.intValue() == posts.intValue()) {
-            ProgressWatcher.notifyError("All " + posts + " parallel download jobs failed (see previous logs)");
+            ProgressWatcher.getInstance().notify("***WARNING*** All " + posts + " parallel download jobs failed (see previous logs)");
             return false; // all jobs failed, also no need to wait
         }
 
@@ -133,7 +140,7 @@ public class ParallelDownloadService {
 
         // prepare to wait
         String timeUnits = allJobsDoneTimeoutMinutes <= 1 ? "minute" : "minutes";
-        ProgressWatcher.notify("Wait up to " + allJobsDoneTimeoutMinutes + " " + timeUnits + " for any outstanding parallel download jobs...");
+        ProgressWatcher.getInstance().notify("Wait up to " + allJobsDoneTimeoutMinutes + " " + timeUnits + " for any outstanding parallel download jobs...");
 
         // wait...
         boolean allDone = false;
@@ -144,7 +151,7 @@ public class ParallelDownloadService {
         }
 
         if (!allDone)
-            ProgressWatcher.notifyError("Not all parallel download jobs completed. Please retry with a longer wait.");
+            ProgressWatcher.getInstance().notifyError("Not all parallel download jobs completed. Please retry with a longer wait.");
 
         // force shutdown
         executor.shutdownNow();
@@ -152,7 +159,12 @@ public class ParallelDownloadService {
         // check if all completed (completions equal posts)
         allDone = completions.intValue() == posts.intValue();
         if (!allDone)
-            ProgressWatcher.notifyError((posts.intValue() - completions.intValue()) + " parallel download jobs didn't complete");
+            ProgressWatcher.getInstance().notify("***WARNING*** " + failures.intValue() + " of " + posts.intValue() + " parallel download jobs didn't complete (see previous logs)");
+
+        // since now shutdown, reset counters
+        posts.set(0);
+        completions.set(0);
+        failures.set(0);
 
         return allDone;
     }

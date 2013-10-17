@@ -51,7 +51,8 @@ Edit the properties file to set the following parameters:
 
 * "accessToken" (required) - access token that belongs to your Smartsheet account administrator.  See the Requirements section above on how to get an access token
 * "outputDir" (required) - desired output directory.  You can provide an absolute * path (e.g., "C:\some\directory") or a path relative to the directory in which the backup utility resides (e.g., "some\directory")
-* "zipOutputDir" (optional, default is false) - set to true to create a ziped archive of the outputDir
+* "zipOutputDir" (optional, default is false) - set to true to create a zipped archive of the outputDir
+* "continueOnError" (optional, default is false) - set to true to continue on error (instead of terminating the backup)
 * "downloadThreads" (optional, default is 4) - set to desired number of threads used to download attachments
 
 To execute the backup, run the following command "java -jar smartsheet-org-backup.jar".
@@ -67,6 +68,8 @@ Logging
 * The tool exits with exit code 0 on success, and -1 on failure.
 * Errors are prepended "\*\*\*ERROR\*\*\*" and logged.
 * Upon successful completion (no errors), the tool will output a brief summary including "\*\*\* Org backup done... \*\*\*" along with the number of users backed up and time elapsed.
+* If the "continueOnError" option is enabled, the last line will instead be a summary of the number of errors encountered, plus the path to an error log file.
+The error log file will contain timestamped logs of each error, with details provided to allow you to attempt manual recovery of a specific user's sheet or attachment skipped in the backup, or to simply try running the tool again.  
 
 Contributing
 ---

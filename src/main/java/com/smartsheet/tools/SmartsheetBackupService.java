@@ -37,6 +37,7 @@ import com.smartsheet.restapi.model.SmartsheetSheet;
 import com.smartsheet.restapi.model.SmartsheetUser;
 import com.smartsheet.restapi.model.SmartsheetWorkspace;
 import com.smartsheet.restapi.service.SmartsheetService;
+import com.smartsheet.utils.ErrorHandler;
 import com.smartsheet.utils.ProgressWatcher;
 
 /**
@@ -97,15 +98,21 @@ public class SmartsheetBackupService {
                 // sheets they own, the hierarchy they see in Smartsheet, etc.)
                 if (status.equals(USER_ACTIVE_STATUS)) {
 
-                    ProgressWatcher.notify(String.format(
+                    ProgressWatcher.getInstance().notify(String.format(
                         "--------------------Start backup for user [%d of %d]: %s--------------------",
                         i+1, numberUsers, email));
-                    assumeUserAndBackup(backupFolder, email);
+                    try {
+                        assumeUserAndBackup(backupFolder, email);
+
+                    } catch (Exception e) {
+                        ErrorHandler.handle(e, email);
+                        skippedUsers++;
+                    }
 
                 } else {
                     // user not active yet and will result in 401 (Unauthorized)
                     // if try to assume their identity, so skip...
-                    ProgressWatcher.notify(String.format(
+                    ProgressWatcher.getInstance().notify(String.format(
                         "--------------------SKIP backup for user [%d of %d]: %s (%s)--------------------",
                         i+1, numberUsers, email, status.toLowerCase()));
                     skippedUsers++;
@@ -180,11 +187,11 @@ public class SmartsheetBackupService {
         	if (isRootFolder) {
         		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_hh_mm_ss");
             	File renamedFolder = new File(backupFolder.getAbsolutePath() + "-" + sdf.format(new Date(backupFolder.lastModified())));
-            	ProgressWatcher.notify(String.format("Renaming previous output from [%s] to [%s]", backupFolder.getAbsolutePath(), renamedFolder.getAbsolutePath()));
+            	ProgressWatcher.getInstance().notify(String.format("Renaming previous output from [%s] to [%s]", backupFolder.getAbsolutePath(), renamedFolder.getAbsolutePath()));
             	backupFolder.renameTo(renamedFolder);
         	} else {
         		deleteFolder(backupFolder);
-        		
+
         	}
         }
 
@@ -198,10 +205,10 @@ public class SmartsheetBackupService {
             return;
 
         File sheetFile = sheetSaver.save(sheet, folder);
-        ProgressWatcher.notify(String.format("Sheet [%s] saved as [%s]", sheet.getName(), sheetFile.getAbsolutePath()));
+        ProgressWatcher.getInstance().notify(String.format("Sheet [%s] saved as [%s]", sheet.getName(), sheetFile.getAbsolutePath()));
 
         // get sheet details and...
-        sheet = this.apiService.getSheetDetails(sheet.getId());
+        sheet = this.apiService.getSheetDetails(sheet.getName(), sheet.getId());
         // 1. collect sheet attachments
         List<SmartsheetAttachment> attachments = new ArrayList<SmartsheetAttachment>(sheet.getAttachments());
         // 2. collect sheet discussion attachments
@@ -227,10 +234,10 @@ public class SmartsheetBackupService {
         for (SmartsheetAttachment attachment : attachments) {
             String attachmentType = attachment.getAttachmentType();
             if (attachmentType.equals(FILE_ATTACHMENT_TYPE)) {
-                sheetSaver.saveAsynchronously(attachment, folder);
+                sheetSaver.saveAsynchronously(attachment, folder, sheet.getName());
             } else {
                 File summariesFile = sheetSaver.saveSummary(attachment, sheet, folder);
-                ProgressWatcher.notify(String.format("%s Attachment [%s] recorded in [%s]", attachmentType, attachment.getName(), summariesFile.getAbsolutePath()));
+                ProgressWatcher.getInstance().notify(String.format("%s Attachment [%s] recorded in [%s]", attachmentType, attachment.getName(), summariesFile.getAbsolutePath()));
             }
         }
     }
@@ -250,7 +257,7 @@ public class SmartsheetBackupService {
         if (origFolderName == null)
             origFolderName = newFolderName;
 
-        ProgressWatcher.notify(String.format("Folder [%s] created as [%s]", origFolderName, newFolder.getAbsolutePath()));
+        ProgressWatcher.getInstance().notify(String.format("Folder [%s] created as [%s]", origFolderName, newFolder.getAbsolutePath()));
         return newFolder;
     }
 

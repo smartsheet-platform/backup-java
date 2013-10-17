@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
 import java.net.URLEncoder;
 
 import org.apache.http.HttpEntity;
@@ -82,51 +81,56 @@ public class HttpUtils {
     /**
      * Saves the contents at the specified URL to a local file, with the optional
      * accessToken and userToAssume arguments used when requesting the URL.
-     * @throws InterruptedException 
      */
-    public static void saveUrlToFile(String url, File file, String accessToken, String acceptHeader, String userToAssume)
-            throws IOException, InterruptedException {
-    	 ServiceUnavailableException finalException = null;
-    	 //This logic should be moved to the smartsheet api class. adding retry logic here for expediency.
-    	for (int i = 0; i <= RetryingSmartsheetService.MAX_RETRIES; i++) {
-    	try {
-	        HttpGet httpGet = newGetRequest(url, accessToken, acceptHeader, userToAssume);
-	        HttpResponse response = getResponse(httpGet);
-	        try {
-	            StatusLine status = response.getStatusLine();
-	            if (status.getStatusCode() == 403 && accessToken == null)
-	                return; // ignore 403 if accessToken null for test mode
-	            if (status.getStatusCode() == ServiceUnavailableException.SERVICE_UNAVAILABLE_CODE)
-	                throw new ServiceUnavailableException(url);
-	            
-	            InputStream content = getContentOnSuccess(response, url, status);
-	            InputStream inStream = new BufferedInputStream(content, ATTACHMENT_BUFFER_SIZE);
-	            if (file.exists()) {
-	            	file.delete();
-	            }
-	            OutputStream outStream = new BufferedOutputStream(new FileOutputStream(file), ATTACHMENT_BUFFER_SIZE);
-	            copyAndClose(inStream, outStream);
-	            return;
-	        } finally {
-	            httpGet.releaseConnection();
-	        }
-    	}  catch (ServiceUnavailableException sue) {
-    		 if (i < RetryingSmartsheetService.MAX_RETRIES)
-    			 RetryingSmartsheetService.sleepForDefinedInterval(i+1, "saveUrlToFile");
-             else
-                 finalException = sue;
-    		} catch (IOException se) {
-    			//There was an error downloading the sheet. We'll try again.
-        		if (i >= RetryingSmartsheetService.MAX_RETRIES) {
-        			throw se;
-        		}
-        		ProgressWatcher.notify("An unexpected error occured while attempting to download " + file.getName());
-        	}
+    public static void saveUrlToFile(String url, File file, String accessToken, String acceptHeader, String userToAssume) 
+            throws InterruptedException, IOException {
+        IOException finalException = null;
+        // This logic should be moved to the smartsheet api class. adding retry logic here for expediency.
+        for (int i = 0; i <= RetryingSmartsheetService.MAX_RETRIES; i++) {
+            try {
+                HttpGet httpGet = newGetRequest(url, accessToken, acceptHeader, userToAssume);
+                HttpResponse response = getResponse(httpGet);
+                try {
+                    StatusLine status = response.getStatusLine();
+                    if (status.getStatusCode() == 403 && accessToken == null)
+                        return; // ignore 403 if accessToken null for test mode
+
+                    if (status.getStatusCode() == ServiceUnavailableException.SERVICE_UNAVAILABLE_CODE)
+                        throw new ServiceUnavailableException(url);
+
+                    InputStream content = getContentOnSuccess(response, url, status);
+                    InputStream inStream = new BufferedInputStream(content, ATTACHMENT_BUFFER_SIZE);
+                    if (file.exists())
+                        file.delete();
+
+                    OutputStream outStream = new BufferedOutputStream(new FileOutputStream(file), ATTACHMENT_BUFFER_SIZE);
+                    copyAndClose(inStream, outStream);
+                    return;
+
+                } finally {
+                    httpGet.releaseConnection();
+                }
+            } catch (ServiceUnavailableException sue) {
+                if (i < RetryingSmartsheetService.MAX_RETRIES)
+                    RetryingSmartsheetService.sleepForDefinedInterval(i+1, "saveUrlToFile");
+                else
+                    finalException = sue;
+
+            } catch (IOException unexpected) {
+                // There was an unexpected error getting the content at the URL.
+                // We'll try again immediately, unless we've reached MAX_RETRIES.
+                if (i < RetryingSmartsheetService.MAX_RETRIES)
+                    ProgressWatcher.getInstance().notify(String.format(
+                        "An unexpected error occurred while attempting to download [%s] to [%s]. Retrying...",
+                        url, file.getAbsolutePath()));
+                else
+                    finalException = unexpected;
+            }
         }
         throw finalException;
     }
 
-    public static void saveUrlToFile(String url, File file) throws IOException, InterruptedException {
+    public static void saveUrlToFile(String url, File file) throws InterruptedException, IOException {
         saveUrlToFile(url, file, null, null, null);
     }
 

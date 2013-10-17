@@ -45,6 +45,7 @@ public class RetryingSmartsheetService implements SmartsheetService {
         this.delegateService = delegateService;
     }
 
+    @Override
     public List<SmartsheetUser> getUsers() throws Exception {
         ServiceUnavailableException finalException = null;
 
@@ -64,6 +65,7 @@ public class RetryingSmartsheetService implements SmartsheetService {
         throw finalException;
     }
 
+    @Override
     public SmartsheetHome getHome() throws Exception {
         ServiceUnavailableException finalException = null;
 
@@ -83,13 +85,14 @@ public class RetryingSmartsheetService implements SmartsheetService {
         throw finalException;
     }
 
-    public SmartsheetSheet getSheetDetails(long sheetId) throws Exception {
+    @Override
+    public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
         ServiceUnavailableException finalException = null;
 
         for (int i = 0; i <= MAX_RETRIES; i++) {
             notifyIfRetry(i);
             try {
-                return delegateService.getSheetDetails(sheetId);
+                return delegateService.getSheetDetails(sheetName, sheetId);
 
             } catch (ServiceUnavailableException e) {
                 if (i < MAX_RETRIES)
@@ -102,13 +105,14 @@ public class RetryingSmartsheetService implements SmartsheetService {
         throw finalException;
     }
 
-    public SmartsheetAttachment getAttachmentDetails(long attachmentId) throws Exception {
+    @Override
+    public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception {
         ServiceUnavailableException finalException = null;
 
         for (int i = 0; i <= MAX_RETRIES; i++) {
             notifyIfRetry(i);
             try {
-                return delegateService.getAttachmentDetails(attachmentId);
+                return delegateService.getAttachmentDetails(attachmentName, attachmentId, sheetName);
 
             } catch (ServiceUnavailableException e) {
                 if (i < MAX_RETRIES)
@@ -121,25 +125,28 @@ public class RetryingSmartsheetService implements SmartsheetService {
         throw finalException;
     }
 
+    @Override
     public String getAccessToken() {
         return delegateService.getAccessToken();
     }
 
     private static void notifyIfRetry(int i) {
         if (i > 0)
-            ProgressWatcher.notify("--- retry #" + i);
+            ProgressWatcher.getInstance().notify("--- retry #" + i);
     }
 
     public static void sleepForDefinedInterval(int retryNumber, String action) throws InterruptedException {
         int sleepSecs = retryNumber * WAIT_INTERVAL_SECS;
-        ProgressWatcher.notify("503 (Service Unavailable) received for [" + action + "] - sleep " + sleepSecs + " secs before retry...");
+        ProgressWatcher.getInstance().notify("503 (Service Unavailable) received for [" + action + "] - sleep " + sleepSecs + " secs before retry...");
         Thread.sleep(TimeUnit.SECONDS.toMillis(sleepSecs));
     }
 
+    @Override
     public void assumeUser(String assumedUserEmail) {
         delegateService.assumeUser(assumedUserEmail);
     }
 
+    @Override
     public String getAssumedUser() {
         return delegateService.getAssumedUser();
     }
