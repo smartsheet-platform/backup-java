@@ -22,6 +22,10 @@ Overview
 --------
 This command-line backup utility takes a snapshot of the data in a Smartsheet Team or Enterprise account and saves it to local storage.  Only the sheets (including attachments and discussions) owned by users of the account are backed up.
 
+Release History
+------------
+* Oct 24 2013 - version 1.1: improved logging, improved file download, "continueOnError" option
+* Jun 6 2013 - version 1.0
 
 Requirements
 ------------
