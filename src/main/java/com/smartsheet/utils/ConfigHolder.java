@@ -16,6 +16,10 @@
 **/
 package com.smartsheet.utils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 /**
  * A holder of specific configuration properties for the current application.
  * Any such properties are injected into this holder.
@@ -23,6 +27,8 @@ package com.smartsheet.utils;
 public class ConfigHolder {
 
     private static final ConfigHolder singleton = new ConfigHolder();
+    private static final String DEFAULT_PROPERTY_FILE = "/smartsheet-backup.properties";
+    private Properties properties;
 
     public static ConfigHolder getInstance() {
         return singleton;
@@ -33,6 +39,11 @@ public class ConfigHolder {
 
     private ConfigHolder() {
         // private constructor because this is a singleton helper class, not intended to be instantiated
+        try{
+          loadDefaultPropertyFile();
+        } catch(IOException e){
+          throw new RuntimeException(e);
+        }
     }
 
     public boolean isContinueOnError() {
@@ -41,5 +52,23 @@ public class ConfigHolder {
 
     public void setContinueOnError(boolean continueOnError) {
         this.continueOnError = continueOnError;
+    }
+
+    private void loadDefaultPropertyFile() throws IOException {
+        InputStream inputStream = getClass().getResourceAsStream(DEFAULT_PROPERTY_FILE);
+        properties = new Properties();
+        properties.load(inputStream);
+    }
+
+    public boolean hasProperties() {
+        return !properties.isEmpty();
+    }
+
+    public boolean hasProperty(String key) {
+        return properties.containsKey(key);
+    }
+
+    public Object getProperty(String key) {
+        return properties.get(key);
     }
 }
