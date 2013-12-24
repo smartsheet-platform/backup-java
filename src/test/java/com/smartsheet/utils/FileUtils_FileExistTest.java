@@ -3,6 +3,7 @@ package com.smartsheet.utils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.After;
@@ -15,7 +16,7 @@ import org.junit.Test;
  * @author isim
  *
  */
-public class FileUtilsTest {
+public class FileUtils_FileExistTest {
 
   private final static String testFilePrefix = "smartsheet-test-";
   private final static String testFileSuffix = ".tmp";
@@ -62,6 +63,12 @@ public class FileUtilsTest {
       e.printStackTrace();
       Assert.fail(e.getMessage());
     }
+  }
+  
+  @Test
+  public void testFileExistsInFolder_NoSuchFileInTempFolder() {
+    File noSuchFile = new File(Long.toString(new Date().getTime()));
+    Assert.assertTrue(!FileUtils.fileNameExistsInFolder(noSuchFile.getName(), systemTempFolder));
   }
   
   private void createUniqueFileInSystemTempFolder() throws IOException{
