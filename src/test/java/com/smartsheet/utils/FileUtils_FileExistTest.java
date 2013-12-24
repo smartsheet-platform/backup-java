@@ -48,6 +48,7 @@ public class FileUtils_FileExistTest {
   @Test(expected=NullPointerException.class)
   public void testFileExistsInFolder_NullFileName() {
     FileUtils.fileNameExistsInFolder(null, systemTempFolder);
+    Assert.fail("Should have failed with a NullPointerException.");
   }
   
   @Test
