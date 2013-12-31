@@ -65,7 +65,7 @@ public class FileUtils {
      * Checks if the specified file name exists (is already used) in a folder.
      */
     public static boolean fileNameExistsInFolder(String fileName, File folder) {
-        if(fileName == "")
+        if(fileName.equals(""))
            return false;
         File file = new File(folder, fileName);
         return file.exists();
