@@ -40,6 +40,7 @@ Limitations
 * Sheets which have been shared to the members of the Smartsheet account, but are not owned by them, will not be backed up.
 * Workspace discussions and attachments are not backed up.
 
+
 How it works
 --------
 * The backup utility checks whether the specified output directory already exists.  If it does, the utility renames the directory to include its last modified timestamp, and creates a new output directory.
@@ -48,8 +49,11 @@ How it works
 * Each sheet is saved as an XLS file that matches the Sheet's name, with discussions saved on a second tab inside the XLS file.  All file attachments are saved in a directory named "[Sheet Name] - attachments".  
 * Non-file attachments (Google Drive files, Box files, and web URLs) are stored in a file called "[Sheet Name] - non-file attachments.csv" in the same directory as the file attachments. The following properties are provided for each non-file attachment: Name, URL, and AttachmentType.
 
+
 Usage
 ------------
+First, download the backup zipped archive from the Developer Portal tools page here](https://www.smartsheet.com/developers/apps).  Unzip the archive - it will contain the JAR executable and a sample properties file.
+
 The tool will look for smartsheet-backup.properties file in the current directory (the directory from which it is being executed).
 Edit the properties file to set the following parameters:
 
