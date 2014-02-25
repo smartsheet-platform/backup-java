@@ -24,6 +24,7 @@ This command-line backup utility takes a snapshot of the data in a Smartsheet Te
 
 Release History
 ------------
+* Feb 24 2014 - version 1.2: Added explicit flushing to disk.
 * Oct 24 2013 - version 1.1: improved logging, improved file download, "continueOnError" option
 * Jun 6 2013 - version 1.0
 
