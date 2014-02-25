@@ -187,6 +187,7 @@ public class HttpUtils {
             }
 
         } finally {
+        	outStream.flush();
             outStream.close();
         }
     }
