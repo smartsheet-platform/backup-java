@@ -141,7 +141,12 @@ public class ParallelDownloadService {
 
         // prepare to wait
         String timeUnits = allJobsDoneTimeoutMinutes <= 1 ? "minute" : "minutes";
-        ProgressWatcher.getInstance().notify("Wait up to " + allJobsDoneTimeoutMinutes + " " + timeUnits + " for any outstanding parallel download jobs...");
+        if(allJobsDoneTimeoutMinutes == Integer.MAX_VALUE){
+        	ProgressWatcher.getInstance().notify("Waiting for outstanding download jobs to complete.");
+        }else{
+        	ProgressWatcher.getInstance().notify("Wait up to " + allJobsDoneTimeoutMinutes + " " + timeUnits + 
+        			" for any outstanding parallel download jobs...");
+        }
 
         // wait...
         boolean allDone = false;

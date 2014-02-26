@@ -41,7 +41,8 @@ public class SmartsheetBackupTool {
     private static final String PROPERTIES_FILENAME = "smartsheet-backup.properties";
 
     private final static int DEFAULT_DOWNLOAD_THREADS = 4; // optimal if 4 cores
-    private final static int DEFAULT_ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES = 2; // matches Smartsheet attachment URL expiry
+    // matches Smartsheet attachment URL expiry
+    private final static int DEFAULT_ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES = Integer.MAX_VALUE; 
     private static final boolean DEFAULT_ZIP_OUTPUT_DIR_FLAG = false;
     private static final boolean DEFAULT_CONTINUE_ON_ERROR_FLAG = false;
 
