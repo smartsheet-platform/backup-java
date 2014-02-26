@@ -18,7 +18,7 @@ package com.smartsheet.restapi.model;
 
 import java.util.Date;
 
-public class SmartsheetAttachment extends SmartsheetNamedEntity {
+public class SmartsheetAttachment extends SmartsheetNamedEntity implements Cloneable {
 
     private String attachmentType;
 
@@ -78,5 +78,16 @@ public class SmartsheetAttachment extends SmartsheetNamedEntity {
         return "SmartsheetAttachment [name=" + name + ", id=" + id + ", attachmentType=" + attachmentType
                 + ", mimeType=" + mimeType + ", sizeInKb=" + sizeInKb + ", createdAt=" + createdAt + ", url=" + url
                 + "]";
+    }
+    
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+    	SmartsheetAttachment sa = (SmartsheetAttachment)super.clone();
+        sa.attachmentType = this.attachmentType;
+        sa.mimeType = this.mimeType;
+        sa.sizeInKb = this.sizeInKb;
+        sa.createdAt = this.createdAt;
+        sa.url = this.url;
+        return sa;
     }
 }

@@ -234,7 +234,7 @@ public class SmartsheetBackupService {
         for (SmartsheetAttachment attachment : attachments) {
             String attachmentType = attachment.getAttachmentType();
             if (attachmentType.equals(FILE_ATTACHMENT_TYPE)) {
-                sheetSaver.saveAsynchronously(attachment, folder, sheet.getName(), apiService.getAssumedUser());
+                sheetSaver.saveAsynchronously(attachment, folder, sheet.getName());
             } else {
                 File summariesFile = sheetSaver.saveSummary(attachment, sheet, folder);
                 ProgressWatcher.getInstance().notify(String.format("%s Attachment [%s] recorded in [%s]", attachmentType, attachment.getName(), summariesFile.getAbsolutePath()));

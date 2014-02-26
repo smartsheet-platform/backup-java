@@ -34,12 +34,12 @@ import com.smartsheet.utils.ProgressWatcher;
  * {@link SmartsheetService} delegate. The client simply calls the wrapper
  * unaware of retry attempts being made on the delegate as necessary.
  */
-public class RetryingSmartsheetService implements SmartsheetService {
+public class RetryingSmartsheetService implements SmartsheetService, Cloneable {
 
     public static final int MAX_RETRIES = 5;
     private static final int WAIT_INTERVAL_SECS = 5;
 
-    private final SmartsheetService delegateService;
+    private SmartsheetService delegateService;
 
     public RetryingSmartsheetService(SmartsheetService delegateService) {
         this.delegateService = delegateService;
@@ -150,4 +150,16 @@ public class RetryingSmartsheetService implements SmartsheetService {
     public String getAssumedUser() {
         return delegateService.getAssumedUser();
     }
+    
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+    	RetryingSmartsheetService rss = (RetryingSmartsheetService)super.clone();
+    	if(this.delegateService instanceof RestfulSmartsheetService) {
+    		rss.delegateService = (RestfulSmartsheetService)((RestfulSmartsheetService)this.delegateService).clone();
+    	}
+    	
+    	return rss;
+    }
+    
+    
 }

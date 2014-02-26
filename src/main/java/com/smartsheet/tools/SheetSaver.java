@@ -30,6 +30,9 @@ import com.smartsheet.exceptions.SmartsheetGetSheetDetailsException;
 import com.smartsheet.restapi.model.SmartsheetAttachment;
 import com.smartsheet.restapi.model.SmartsheetNamedEntity;
 import com.smartsheet.restapi.model.SmartsheetSheet;
+import com.smartsheet.restapi.service.ErrorContextualizingSmartsheetService;
+import com.smartsheet.restapi.service.RestfulSmartsheetService;
+import com.smartsheet.restapi.service.RetryingSmartsheetService;
 import com.smartsheet.restapi.service.SmartsheetService;
 import com.smartsheet.utils.ProgressWatcher;
 
@@ -81,7 +84,7 @@ public class SheetSaver {
      * @param assumedUser 
      * @throws Exception
      */
-    public void saveAsynchronously(SmartsheetAttachment attachment, File folder, String sheetName, String assumedUserEmail) throws Exception {
+    public void saveAsynchronously(SmartsheetAttachment attachment, File folder, String sheetName) throws Exception {
         File attachmentFile = createFileFor(attachment, folder, null);
         String filePath = attachmentFile.getAbsolutePath();
 
@@ -92,8 +95,19 @@ public class SheetSaver {
         String completedMessage = String.format("...%s Attachment [%s] downloaded as [%s]", attachmentType, attachmentName, filePath);
         String errorContext = String.format("%s Attachment [%s] in Sheet [%s]", attachmentType, attachmentName, sheetName);
 
-        parallelDownloadService.postAsynchronousDownloadJob(new SmartsheetAttachmentContentSource(apiService, 
-        		attachment, sheetName, assumedUserEmail),attachmentFile, postedMessage, completedMessage, errorContext);
+        // Clone the service
+        SmartsheetService clonedService = null;
+        if(apiService instanceof RestfulSmartsheetService){
+        	clonedService = (RestfulSmartsheetService)((RestfulSmartsheetService)apiService).clone();
+        }else if(apiService instanceof RetryingSmartsheetService){
+        	clonedService = (RetryingSmartsheetService)((RetryingSmartsheetService)apiService).clone();
+        }else if(apiService instanceof ErrorContextualizingSmartsheetService) {
+        	clonedService = (ErrorContextualizingSmartsheetService)((ErrorContextualizingSmartsheetService)apiService).clone();
+        }
+        
+        parallelDownloadService.postAsynchronousDownloadJob(new SmartsheetAttachmentContentSource(clonedService, 
+        		(SmartsheetAttachment)attachment.clone(), sheetName),attachmentFile, postedMessage, completedMessage, 
+        		errorContext);
     }
 
     /**

@@ -64,4 +64,9 @@ public class StubServiceUnavailableSmartsheetService implements SmartsheetServic
     public String getAssumedUser() {
         return null;
     }
+    
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+    	return super.clone();
+    }
 }

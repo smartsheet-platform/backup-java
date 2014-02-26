@@ -34,9 +34,9 @@ import com.smartsheet.restapi.model.SmartsheetUser;
  * which adds context based on the current service method being invoked and the
  * parameters of this invocation. It is this new {@link Exception} which is thrown.
  */
-public class ErrorContextualizingSmartsheetService implements SmartsheetService {
+public class ErrorContextualizingSmartsheetService implements SmartsheetService, Cloneable {
 
-    private final SmartsheetService delegateService;
+    private SmartsheetService delegateService;
 
     public ErrorContextualizingSmartsheetService(SmartsheetService delegateService) {
         this.delegateService = delegateService;
@@ -91,5 +91,12 @@ public class ErrorContextualizingSmartsheetService implements SmartsheetService 
     @Override
     public String getAssumedUser() {
         return delegateService.getAssumedUser();
+    }
+    
+    @Override
+	public Object clone() throws CloneNotSupportedException {
+    	ErrorContextualizingSmartsheetService ecss = (ErrorContextualizingSmartsheetService)super.clone();
+    	ecss.delegateService = (SmartsheetService)this.delegateService.clone();
+    	return ecss;
     }
 }

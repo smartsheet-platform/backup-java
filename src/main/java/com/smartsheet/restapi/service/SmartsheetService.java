@@ -41,4 +41,6 @@ public interface SmartsheetService {
     void assumeUser(String assumedUserEmail);
 
     String getAssumedUser();
+    
+    public Object clone() throws CloneNotSupportedException;
 }

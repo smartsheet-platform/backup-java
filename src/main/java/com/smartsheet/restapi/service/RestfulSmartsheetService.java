@@ -32,11 +32,11 @@ import com.smartsheet.utils.HttpUtils;
  * requested to assume the identity of another user on demand as long as the
  * access token provided was for an administrator of that user's organization.
  */
-public class RestfulSmartsheetService implements SmartsheetService {
+public class RestfulSmartsheetService implements SmartsheetService, Cloneable {
 
     private static final String API_BASE_URL = "https://api.smartsheet.com/1.1/";
 
-    private final String accessToken;
+    private String accessToken;
     private String assumedUserEmail;
 
     public RestfulSmartsheetService(String accessToken) {
@@ -87,5 +87,15 @@ public class RestfulSmartsheetService implements SmartsheetService {
     @Override
     public String getAssumedUser() {
         return assumedUserEmail;
+    }
+    
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+    	RestfulSmartsheetService rss = (RestfulSmartsheetService)super.clone();
+    	
+    	rss.assumedUserEmail = this.assumedUserEmail;
+    	rss.accessToken = this.accessToken;
+    	
+    	return rss;
     }
 }
