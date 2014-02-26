@@ -85,34 +85,35 @@ public class ParallelDownloadService {
     public void postAsynchronousDownloadJob(
             final InternetContentSource source,
             final File targetFile,
-            final String postedMessage, final String completedMessage,
+            final String postedMessage, 
+            final String completedMessage,
             final String errorContext) {
 
         ProgressWatcher.getInstance().notify(postedMessage);
 
         // Submit a new job, returning immediately. The job will be queued until
         // a thread in the pool becomes available to handle it.
-        executor.submit(new Callable<File>() {
+        executor.execute(new Runnable() {
 
             // The logic which is executed asynchronously when a thread becomes
             // available to handle the job.
             @Override
-            public File call() throws Exception {
-                String sourceUrl = source.getURL();
+            public void run() {
+            	String sourceUrl = "";
                 try {
+                	sourceUrl = source.getURL();
+                	
                     saveUrlToFile(sourceUrl, targetFile);
 
                     ProgressWatcher.getInstance().notify(completedMessage);
 
                     completions.incrementAndGet();
-                    return targetFile;
 
                 } catch (Exception e) {
                     failures.incrementAndGet();
 
                     ProgressWatcher.getInstance().notifyError(String.format("[%s: %s] downloading from [%s] to [%s] for %s",
                         e.getClass().getSimpleName(), e.getLocalizedMessage(), sourceUrl, targetFile, errorContext));
-                    throw e;
                 }
             }});
 
