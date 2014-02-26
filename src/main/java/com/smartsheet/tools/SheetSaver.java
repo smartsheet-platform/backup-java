@@ -78,9 +78,10 @@ public class SheetSaver {
      * @param attachment the file attachment to save
      * @param folder the existing local folder to save the file attachment to
      * @param sheetName the name of the sheet the attachment belongs to
+     * @param assumedUser 
      * @throws Exception
      */
-    public void saveAsynchronously(SmartsheetAttachment attachment, File folder, String sheetName) throws Exception {
+    public void saveAsynchronously(SmartsheetAttachment attachment, File folder, String sheetName, String assumedUserEmail) throws Exception {
         File attachmentFile = createFileFor(attachment, folder, null);
         String filePath = attachmentFile.getAbsolutePath();
 
@@ -91,10 +92,8 @@ public class SheetSaver {
         String completedMessage = String.format("...%s Attachment [%s] downloaded as [%s]", attachmentType, attachmentName, filePath);
         String errorContext = String.format("%s Attachment [%s] in Sheet [%s]", attachmentType, attachmentName, sheetName);
 
-        parallelDownloadService.postAsynchronousDownloadJob(
-            new SmartsheetAttachmentContentSource(apiService, attachment, sheetName),
-            attachmentFile,
-            postedMessage, completedMessage, errorContext);
+        parallelDownloadService.postAsynchronousDownloadJob(new SmartsheetAttachmentContentSource(apiService, 
+        		attachment, sheetName, assumedUserEmail),attachmentFile, postedMessage, completedMessage, errorContext);
     }
 
     /**

@@ -27,18 +27,25 @@ public class SmartsheetAttachmentContentSource implements InternetContentSource 
     private final SmartsheetService apiService;
     private final SmartsheetAttachment attachment;
     private final String sheetName;
+    private final String assumedUser;
 
     public SmartsheetAttachmentContentSource(SmartsheetService apiService,
-            SmartsheetAttachment attachment, String sheetName) {
+            SmartsheetAttachment attachment, String sheetName, String assumedUser) {
         this.apiService = apiService;
         this.attachment = attachment;
         this.sheetName = sheetName;
+        this.assumedUser = assumedUser;
     }
 
     @Override
     public String getURL() throws Exception {
-        SmartsheetAttachment attachmentDetails = apiService.getAttachmentDetails(
+        
+    	SmartsheetAttachment attachmentDetails = apiService.getAttachmentDetails(
             attachment.getName(), attachment.getId(), sheetName);
-        return attachmentDetails.getUrl(); // ethereal - valid for only 2 minutes
+    	
+    	// Set the user in case another thread changed it on the underlying apiService object
+    	apiService.assumeUser(assumedUser);
+        
+    	return attachmentDetails.getUrl(); // ethereal - valid for only 2 minutes
     }
 }
