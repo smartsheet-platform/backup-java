@@ -26,7 +26,7 @@ Release History
 ------------
 * Feb 27 2014 - version 1.3: 
  - Fixed issue where some files were downloading with a file size of 0 bytes.
- - Changed default download timeout to over 24 hours.
+ - Changed default download timeout to over 2 days.
  - Files are now backed up to a time stamped sub-folder in the backup directory
  - Better error handling when a file or attachment is deleted while the backup is running.
  - Added a user agent to API requests.
@@ -50,7 +50,7 @@ Limitations
 
 How it works
 --------
-* The backup utility checks whether the specified output directory already exists.  If it does, the utility renames the directory to include its last modified timestamp, and creates a new output directory.
+* The backup utility will create a new folder with a timestamp in the user defined back up directory. This folder is used as the base folder for the backup process.
 * For each active user in the account, the backup utility first creates a local directory that matches the user's email address, and then retrieves and backs up all the sheets owned by that user.
 * Within each user's directory, the sheets are organized hierarchically (by folders and workspaces) to match the user's Home tab hierarchy in Smartsheet.
 * Each sheet is saved as an XLS file that matches the Sheet's name, with discussions saved on a second tab inside the XLS file.  All file attachments are saved in a directory named "[Sheet Name] - attachments".  
@@ -64,11 +64,12 @@ First, download the backup zipped archive from the Developer Portal tools page h
 The tool will look for smartsheet-backup.properties file in the current directory (the directory from which it is being executed).
 Edit the properties file to set the following parameters:
 
-* "accessToken" (required) - access token that belongs to your Smartsheet account administrator.  See the Requirements section above on how to get an access token
-* "outputDir" (required) - desired output directory.  You can provide an absolute * path (e.g., "C:\some\directory") or a path relative to the directory in which the backup utility resides (e.g., "some\directory")
-* "zipOutputDir" (optional, default is false) - set to true to create a zipped archive of the outputDir
-* "continueOnError" (optional, default is false) - set to true to continue on error (instead of terminating the backup)
-* "downloadThreads" (optional, default is 4) - set to desired number of threads used to download attachments
+* **accessToken** (required) - access token that belongs to your Smartsheet account administrator.  See the Requirements section above on how to get an access token
+* **outputDir** (required) - desired output directory.  You can provide an absolute * path (e.g., "C:\some\directory") or a path relative to the directory in which the backup utility resides (e.g., "some\directory")
+* **zipOutputDir** (optional, default is false) - set to true to create a zipped archive of the outputDir
+* **continueOnError*** (optional, default is false) - set to true to continue on error (instead of terminating the backup)
+* **downloadThreads** (optional, default is 4) - set to desired number of threads used to download attachments
+* **allDownloadsDoneTimeout*** (optional, default is 2<sup>^32</sup>-1) - The total number of minutes to wait for the attachment downloads to finish.
 
 To execute the backup, run the following command "java -jar smartsheet-org-backup.jar".
 Since it's a runnable jar, you don't need to set classpath or copy other jars. Everything you need is in the runnable jar.
