@@ -28,6 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
@@ -36,6 +37,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.smartsheet.exceptions.ServiceUnavailableException;
 import com.smartsheet.restapi.service.RetryingSmartsheetService;
+import com.smartsheet.tools.SmartsheetBackupTool;
 
 /**
  * Utilities for HTTP operations.
@@ -121,7 +123,7 @@ public class HttpUtils {
                 // We'll try again immediately, unless we've reached MAX_RETRIES.
                 if (i < RetryingSmartsheetService.MAX_RETRIES)
                     ProgressWatcher.getInstance().notify(String.format(
-                        "An unexpected error occurred while attempting to download [%s] to [%s]. Retrying...",
+                        "There was an issue while attempting to download [%s] to [%s]. Retrying...",
                         url, file.getAbsolutePath()));
                 else
                     finalException = unexpected;
@@ -140,8 +142,13 @@ public class HttpUtils {
      */
     private static HttpGet newGetRequest(String url, String accessToken, String acceptHeader, String userToAssume)
             throws UnsupportedEncodingException {
-
+		
         HttpGet httpGet = new HttpGet(url);
+        
+        httpGet.addHeader("User-Agent","Smartsheet Org Backup Tool/"+SmartsheetBackupTool.VERSION+" " + 
+				System.getProperty("os.name") + " "+System.getProperty("java.vm.name") + " " + 
+				System.getProperty("java.vendor") + " " + System.getProperty("java.version"));
+        
         if (accessToken != null)
             httpGet.addHeader("Authorization", "Bearer " + accessToken);
         if (acceptHeader != null)
@@ -168,8 +175,10 @@ public class HttpUtils {
 
         int statusCode = status.getStatusCode();
         String reason = status.getReasonPhrase();
-        if (statusCode != 200)
+        
+        if (statusCode != 200) {
             throw new IOException("GET " + url + " returned " + statusCode + " (" + reason + ")");
+        }
 
         HttpEntity entity = response.getEntity();
         return entity.getContent();

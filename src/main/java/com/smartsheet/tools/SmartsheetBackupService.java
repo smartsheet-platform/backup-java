@@ -21,6 +21,7 @@ import static com.smartsheet.utils.FileUtils.folderNameExistsInParentFolder;
 import static com.smartsheet.utils.FileUtils.stripExtension;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -80,8 +81,9 @@ public class SmartsheetBackupService {
      * @throws Exception
      */
     public int backupOrgTo(File backupFolder) throws Exception {
-        // get all users in the organization and prepare the backup folder
+    	// get all users in the organization and prepare the backup folder
         List<SmartsheetUser> users = apiService.getUsers();
+        
         prepareBackupFolder(backupFolder, true);
 
         // iterate through the users, backing up the active ones
@@ -138,7 +140,7 @@ public class SmartsheetBackupService {
     private void assumeUserAndBackup(File backupFolder, String userEmail) throws Exception {
         File userFolder = createNewFolderQuietly(backupFolder, userEmail);
         apiService.assumeUser(userEmail);
-        backupTo(userFolder);
+        backupTo(userFolder, userEmail);
     }
 
     /**
@@ -150,7 +152,7 @@ public class SmartsheetBackupService {
      *
      * @throws Exception
      */
-    public void backupTo(File backupFolder) throws Exception {
+    public void backupTo(File backupFolder, String userEmail) throws Exception {
         SmartsheetHome home = apiService.getHome();
         List<SmartsheetSheet> sheets = home.getSheets();
         List<SmartsheetFolder> folders = home.getFolders();
@@ -164,7 +166,11 @@ public class SmartsheetBackupService {
 
         // and save the top-level sheets
         for (SmartsheetSheet sheet : sheets) {
-            saveSheetToFolder(sheet, sheetsRoot);
+            try{
+            	saveSheetToFolder(sheet, sheetsRoot);
+            }catch(Exception ex){
+            	ErrorHandler.handle(ex, userEmail);
+            }
         }
 
         // then create and save the rest of the hierarchy with contained sheets and attachments
@@ -180,23 +186,17 @@ public class SmartsheetBackupService {
      * @throws FileSystemItemException
      */
     private static void prepareBackupFolder(File backupFolder, boolean isRootFolder) throws FileSystemItemException {
-        if (backupFolder.exists() && !backupFolder.isDirectory())
+
+    	
+    	if (backupFolder.exists() && !backupFolder.isDirectory()){
             throw new IllegalArgumentException(backupFolder.getAbsolutePath() + " is not a directory");
+        }else if(backupFolder.exists()){
+    		return;
+    	}
 
-        if (backupFolder.exists()) {
-        	if (isRootFolder) {
-        		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_hh_mm_ss");
-            	File renamedFolder = new File(backupFolder.getAbsolutePath() + "-" + sdf.format(new Date(backupFolder.lastModified())));
-            	ProgressWatcher.getInstance().notify(String.format("Renaming previous output from [%s] to [%s]", backupFolder.getAbsolutePath(), renamedFolder.getAbsolutePath()));
-            	backupFolder.renameTo(renamedFolder);
-        	} else {
-        		deleteFolder(backupFolder);
-
-        	}
-        }
-
-        if (!backupFolder.mkdirs())
+        if (!backupFolder.mkdirs()){
             throw new CreateFileSystemItemException(backupFolder);
+        }
     }
 
     private void saveSheetToFolder(SmartsheetSheet sheet, File folder) throws Exception {
@@ -263,7 +263,7 @@ public class SmartsheetBackupService {
 
     private static File createNewFolderQuietly(File parentFolder, String newFolderName) throws CreateFileSystemItemException {
         File newFolder = new File(parentFolder, SheetSaver.scrubName(newFolderName));
-
+        
         if (!newFolder.mkdir())
             throw new CreateFileSystemItemException(newFolder);
         return newFolder;

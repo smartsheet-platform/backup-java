@@ -24,11 +24,12 @@ This command-line backup utility takes a snapshot of the data in a Smartsheet Te
 
 Release History
 ------------
-<!--
-* Feb 26 2014 - version 1.3: 
- - Fixed issue where some files were downloaded as 0 bytes.
- - Changed default download timeout to be longer than a day.
--->
+* Feb 27 2014 - version 1.3: 
+ - Fixed issue where some files were downloading with a file size of 0 bytes.
+ - Changed default download timeout to over 24 hours.
+ - Files are now backed up to a time stamped sub-folder in the backup directory
+ - Better error handling when a file or attachment is deleted while the backup is running.
+ - Added a user agent to API requests.
 * Feb 24 2014 - version 1.2: Added explicit flushing to disk.
 * Oct 24 2013 - version 1.1: improved logging, improved file download, "continueOnError" option
 * Jun 6 2013 - version 1.0
