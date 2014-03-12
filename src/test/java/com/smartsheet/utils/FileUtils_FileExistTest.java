@@ -42,12 +42,12 @@ public class FileUtils_FileExistTest {
   
     @Test
     public void testFileExistsInFolder_EmptyFileName() {
-        Assert.assertTrue(!FileUtils.fileNameExistsInFolder("", systemTempFolder));
+        Assert.assertTrue(!FileUtils.fileNameExistsInFolder("", systemTempFolder.getAbsolutePath()));
     }
     
     @Test(expected=NullPointerException.class)
     public void testFileExistsInFolder_NullFileName() {
-        FileUtils.fileNameExistsInFolder(null, systemTempFolder);
+        FileUtils.fileNameExistsInFolder(null, systemTempFolder.getAbsolutePath());
         Assert.fail("Should have failed with a NullPointerException.");
     }
   
@@ -55,7 +55,7 @@ public class FileUtils_FileExistTest {
     public void testFileExistsInFolder_AddOneFileToTempFolder() {
         try {
             createUniqueFileInSystemTempFolder();
-            Assert.assertTrue(FileUtils.fileNameExistsInFolder(testFiles.get(0).getName(), systemTempFolder));
+            Assert.assertTrue(FileUtils.fileNameExistsInFolder(testFiles.get(0).getName(), systemTempFolder.getAbsolutePath()));
         } catch(IOException e){
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -69,7 +69,7 @@ public class FileUtils_FileExistTest {
             createUniqueFileInSystemTempFolder();
             createUniqueFileInSystemTempFolder();
             createUniqueFileInSystemTempFolder();
-            Assert.assertTrue(FileUtils.fileNameExistsInFolder(testFiles.get(0).getName(), systemTempFolder));
+            Assert.assertTrue(FileUtils.fileNameExistsInFolder(testFiles.get(0).getName(), systemTempFolder.getAbsolutePath()));
         } catch(IOException e){
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -80,7 +80,7 @@ public class FileUtils_FileExistTest {
     public void testFileExistsInFolder_NewFolderToTempFolder() {
         try {
             createNewFolderInSystemTempFolder();
-            Assert.assertTrue(FileUtils.fileNameExistsInFolder(testFiles.get(0).getName(), systemTempFolder));
+            Assert.assertTrue(FileUtils.fileNameExistsInFolder(testFiles.get(0).getName(), systemTempFolder.getAbsolutePath()));
         } catch(IOException e){
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -90,7 +90,7 @@ public class FileUtils_FileExistTest {
     @Test
     public void testFileExistsInFolder_NoSuchFileInTempFolder() {
         File noSuchFile = new File(Long.toString(new Date().getTime()));
-        Assert.assertTrue(!FileUtils.fileNameExistsInFolder(noSuchFile.getName(), systemTempFolder));
+        Assert.assertTrue(!FileUtils.fileNameExistsInFolder(noSuchFile.getName(), systemTempFolder.getAbsolutePath()));
     }
     
     private void createUniqueFileInSystemTempFolder() throws IOException{

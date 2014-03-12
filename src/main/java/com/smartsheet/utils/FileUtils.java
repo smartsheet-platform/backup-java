@@ -64,14 +64,15 @@ public class FileUtils {
     /**
      * Checks if the specified file name exists (is already used) in a folder.
      */
-    public static boolean fileNameExistsInFolder(String fileName, File folder) {
-        if(fileName.equals(""))
+    public static boolean fileNameExistsInFolder(String fileName, String folder) {
+        File folder1 = new File(folder);
+    	if(fileName.equals(""))
            return false;
-        File file = new File(folder, fileName);
+        File file = new File(folder1, fileName);
         return file.exists();
     }
 
-    public static boolean folderNameExistsInParentFolder(String folderName, File parentFolder) {
+    public static boolean folderNameExistsInParentFolder(String folderName, String parentFolder) {
         return fileNameExistsInFolder(folderName, parentFolder); // alias
     }
 

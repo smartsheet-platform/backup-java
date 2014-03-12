@@ -39,7 +39,7 @@ public class ErrorHandler {
         String error = String.format("backing up user [%s] - %s - %s",
             currentUser, exceptionType, exceptionMessage);
 
-        ProgressWatcher.getInstance().notifyError(error);
+        ProgressWatcher.getInstance().notifyError(error,exception);
 
         // if continueOnError is not set, then instead of continuing, just throw the exception again
         if (!ConfigHolder.getInstance().isContinueOnError())

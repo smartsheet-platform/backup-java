@@ -28,7 +28,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
@@ -176,7 +175,12 @@ public class HttpUtils {
         int statusCode = status.getStatusCode();
         String reason = status.getReasonPhrase();
         
-        if (statusCode != 200) {
+        
+        
+        if(statusCode >= 500){
+        	// This exception is caught and causes it to try again.
+        	throw new ServiceUnavailableException(url);
+        }else if (statusCode != 200) {
             throw new IOException("GET " + url + " returned " + statusCode + " (" + reason + ")");
         }
 

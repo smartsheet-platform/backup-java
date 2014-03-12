@@ -16,10 +16,14 @@
 **/
 package com.smartsheet.tools;
 
+import com.smartsheet.restapi.model.SmartsheetAttachment;
+
 /**
  * A content source on the Internet addressable by a URL. Typically represents a file.
  */
 public interface InternetContentSource {
 
     String getURL() throws Exception;
+
+	SmartsheetAttachment getAttachment();
 }

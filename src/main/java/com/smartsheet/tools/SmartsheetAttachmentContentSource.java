@@ -42,4 +42,9 @@ public class SmartsheetAttachmentContentSource implements InternetContentSource 
         
     	return attachmentDetails.getUrl(); // ethereal - valid for only 2 minutes
     }
+    
+    @Override
+    public SmartsheetAttachment getAttachment(){
+    	return attachment;
+    }
 }

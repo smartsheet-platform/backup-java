@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -52,13 +53,18 @@ public class ProgressWatcher {
         System.out.println(status);
     }
 
-    public synchronized void notifyError(String error) {
+    public synchronized void notifyError(String error, Exception ex) {
         notify("***ERROR*** " + error);
         errorCount++;
         if (logErrorsToFile) {
             try {
+            	if(ex != null){
+                    StringWriter sw = new StringWriter();
+                    ex.printStackTrace(new PrintWriter(sw));
+            		error += error+"\nTRACE:\n"+sw.toString();
+            	}
+            	
                 logToFile(error);
-
             } catch (IOException e) {
                 notify(String.format(
                     "***ERROR*** Failed to write to error log file [%s] due to %s - %s",
@@ -71,7 +77,7 @@ public class ProgressWatcher {
         Throwable cause = error.getCause();
         if (cause != null)
             error = cause;
-        notifyError(String.format("%s - %s", error.getClass().getSimpleName(), error.getLocalizedMessage()));
+        notifyError(String.format("%s - %s", error.getClass().getSimpleName(), error.getLocalizedMessage()),null);
         System.out.flush(); // flush before printing stack trace to avoid overlapping logs from multiple threads
         error.printStackTrace();
     }

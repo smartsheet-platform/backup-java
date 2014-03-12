@@ -19,7 +19,6 @@ package com.smartsheet.tools;
 import static com.smartsheet.utils.HttpUtils.saveUrlToFile;
 
 import java.io.File;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -84,10 +83,10 @@ public class ParallelDownloadService {
      */
     public void postAsynchronousDownloadJob(
             final InternetContentSource source,
-            final File targetFile,
             final String postedMessage, 
-            final String completedMessage,
-            final String errorContext) {
+            final String errorContext,
+            final String folder,
+            final String targetFile) {
 
         ProgressWatcher.getInstance().notify(postedMessage);
 
@@ -99,11 +98,16 @@ public class ParallelDownloadService {
             // available to handle the job.
             @Override
             public void run() {
+            	// Create the file and get the name for the file
             	String sourceUrl = "";
                 try {
+                	//targetFile = SheetSaver.createFileFor(source.getAttachment(), folder, null);
+                	String completedMessage = String.format("...%s Attachment [%s] downloaded as [%s]", 
+                			source.getAttachment().getAttachmentType(), source.getAttachment().getName(), targetFile);
+                	
                 	sourceUrl = source.getURL();
                 	
-                    saveUrlToFile(sourceUrl, targetFile);
+                    saveUrlToFile(sourceUrl, new File(folder, targetFile));
 
                     ProgressWatcher.getInstance().notify(completedMessage);
 
@@ -113,13 +117,15 @@ public class ParallelDownloadService {
                     failures.incrementAndGet();
 
                     ProgressWatcher.getInstance().notifyError(String.format("[%s: %s] downloading from [%s] to [%s] for %s",
-                        e.getClass().getSimpleName(), e.getLocalizedMessage(), sourceUrl, targetFile, errorContext));
+                        e.getClass().getSimpleName(), e.getLocalizedMessage(), sourceUrl, targetFile, errorContext),e);
                 }
             }});
 
         // This is executed immediately after the job is posted.
         posts.incrementAndGet();
     }
+    
+
 
     /**
      * @return
@@ -157,7 +163,7 @@ public class ParallelDownloadService {
         }
 
         if (!allDone)
-            ProgressWatcher.getInstance().notifyError("Not all parallel download jobs completed. Please retry with a longer wait.");
+            ProgressWatcher.getInstance().notifyError("Not all parallel download jobs completed. Please retry with a longer wait.", null);
 
         // force shutdown
         executor.shutdownNow();

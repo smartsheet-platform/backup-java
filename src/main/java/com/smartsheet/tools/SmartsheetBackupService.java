@@ -16,16 +16,17 @@
 **/
 package com.smartsheet.tools;
 
-import static com.smartsheet.utils.FileUtils.deleteFolder;
+import static com.smartsheet.utils.FileUtils.fileNameExistsInFolder;
 import static com.smartsheet.utils.FileUtils.folderNameExistsInParentFolder;
 import static com.smartsheet.utils.FileUtils.stripExtension;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.io.FilenameUtils;
 
 import com.smartsheet.exceptions.CreateFileSystemItemException;
 import com.smartsheet.exceptions.FileSystemItemException;
@@ -33,6 +34,7 @@ import com.smartsheet.restapi.model.SmartsheetAttachment;
 import com.smartsheet.restapi.model.SmartsheetDiscussion;
 import com.smartsheet.restapi.model.SmartsheetFolder;
 import com.smartsheet.restapi.model.SmartsheetHome;
+import com.smartsheet.restapi.model.SmartsheetNamedEntity;
 import com.smartsheet.restapi.model.SmartsheetRow;
 import com.smartsheet.restapi.model.SmartsheetSheet;
 import com.smartsheet.restapi.model.SmartsheetUser;
@@ -230,14 +232,45 @@ public class SmartsheetBackupService {
         if (!attachments.isEmpty())
             folder = createNewFolder(folder, stripExtension(sheetFile.getName()) + " - attachments");
 
+        Set<String> usedFiles = new HashSet<String>();
+
         // save each attachment appropriately, either as a file or as a summary for non-files
         for (SmartsheetAttachment attachment : attachments) {
             String attachmentType = attachment.getAttachmentType();
             if (attachmentType.equals(FILE_ATTACHMENT_TYPE)) {
-                sheetSaver.saveAsynchronously(attachment, folder, sheet.getName());
+            	// The api shouldn't return an empty name
+            	if(attachment.getName() == null || attachment.getName().isEmpty()){continue;}
+            	
+            	// Rebuild filename with the base name scrubed.
+            	String targetFile = SheetSaver.scrubName(FilenameUtils.getBaseName(attachment.getName()));
+            	if(!FilenameUtils.getExtension(attachment.getName()).isEmpty()){
+            		targetFile += "."+FilenameUtils.getExtension(attachment.getName());
+            	}
+            	
+            	// Get a unique filename
+            	for(int i = 1; usedFiles.contains(targetFile); i++){
+            		String basename = FilenameUtils.getBaseName(targetFile);
+            		String extension = FilenameUtils.getExtension(targetFile);
+            		
+            		if(i > 1){
+            			targetFile = basename.replaceAll("\\([0-9]+\\)$", "("+i+")");
+            		}else{
+            			targetFile = basename + " ("+i+")";
+            		}
+            		
+            		if(!extension.isEmpty()){
+            			targetFile += "."+extension;
+            		}
+            	}
+            	
+            	// Keep running list of files processed
+            	usedFiles.add(targetFile);
+            	
+                sheetSaver.saveAsynchronously(attachment, folder, sheet.getName(), targetFile);
             } else {
                 File summariesFile = sheetSaver.saveSummary(attachment, sheet, folder);
-                ProgressWatcher.getInstance().notify(String.format("%s Attachment [%s] recorded in [%s]", attachmentType, attachment.getName(), summariesFile.getAbsolutePath()));
+                ProgressWatcher.getInstance().notify(String.format("%s Attachment [%s] recorded in [%s]", 
+                		attachmentType, attachment.getName(), summariesFile.getAbsolutePath()));
             }
         }
     }
@@ -297,7 +330,7 @@ public class SmartsheetBackupService {
         String candidateFolderName = baseFolderName;
         int numberSuffix = 2;
         while (true) { // keep looping until get a non duplicate folder name
-            if (!folderNameExistsInParentFolder(candidateFolderName, parentFolder))
+            if (!folderNameExistsInParentFolder(candidateFolderName, parentFolder.getAbsolutePath()))
                 return candidateFolderName; // this name is not used in the parent folder
 
             // otherwise try another name by appending an incrementing number suffix
