@@ -24,6 +24,12 @@ This command-line backup utility takes a snapshot of the data in a Smartsheet Te
 
 Release History
 ------------
+* Mar 11 2014 - version 1.4:
+ - Sheet attachments are now created at the time of download, not any earlier.
+ - On 500 errors the backup utility will wait and try to retrieve the data multiple times.
+ - Increased error logging.
+ - Better handling of unique names for attachments with duplicate file names.
+ - Enhanced sheet attachment handling so that two threads will not try to write to the same file at the same time.
 * Feb 27 2014 - version 1.3: 
  - Fixed issue where some files were downloading with a file size of 0 bytes.
  - Changed default download timeout to over 2 days.
