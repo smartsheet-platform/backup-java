@@ -43,8 +43,6 @@ public class SmartsheetBackupTool {
 	private static final String PROPERTIES_FILENAME = "smartsheet-backup.properties";
 
 	private final static int DEFAULT_DOWNLOAD_THREADS = 4; // optimal if 4 cores
-	// matches Smartsheet attachment URL expiry
-	private final static int DEFAULT_ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES = Integer.MAX_VALUE;
 	private static final boolean DEFAULT_ZIP_OUTPUT_DIR_FLAG = false;
 	private static final boolean DEFAULT_CONTINUE_ON_ERROR_FLAG = false;
 
@@ -86,9 +84,6 @@ public class SmartsheetBackupTool {
 
 			int downloadThreads = getOptionalProp(props, "downloadThreads",
 					DEFAULT_DOWNLOAD_THREADS, 1);
-			int allDownloadsDoneTimeout = getOptionalProp(props,
-					"allDownloadsDoneTimeout",
-					DEFAULT_ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES, 0);
 
 			// 2. instantiate services
 			SmartsheetService apiService = new ErrorContextualizingSmartsheetService(
@@ -99,8 +94,7 @@ public class SmartsheetBackupTool {
 					// RestfulSmartsheetService:
 							new RestfulSmartsheetService(accessToken)));
 
-			ParallelDownloadService parallelDownloadService = new ParallelDownloadService(
-					downloadThreads, allDownloadsDoneTimeout);
+			ParallelDownloadService parallelDownloadService = new ParallelDownloadService(downloadThreads);
 
 			configHolder.setContinueOnError(continueOnError);
 			progressWatcher.setLogErrorsToFile(continueOnError);

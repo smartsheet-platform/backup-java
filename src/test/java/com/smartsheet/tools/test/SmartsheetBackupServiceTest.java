@@ -44,7 +44,6 @@ public class SmartsheetBackupServiceTest {
 
     // test fixture
     private final static int DOWNLOAD_THREADS = 4;
-    private final static int ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES = 2;
     private ParallelDownloadService parallelDownloadService;
 
     /**
@@ -52,8 +51,7 @@ public class SmartsheetBackupServiceTest {
      */
     @Before
     public void setUp() {
-        parallelDownloadService = new ParallelDownloadService(
-            DOWNLOAD_THREADS, ALL_DOWNLOADS_DONE_TIMEOUT_MINUTES);
+        parallelDownloadService = new ParallelDownloadService(DOWNLOAD_THREADS);
     }
 
     /**

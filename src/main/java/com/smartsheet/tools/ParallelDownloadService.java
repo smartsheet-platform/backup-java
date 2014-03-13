@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-**/
+ **/
 package com.smartsheet.tools;
 
 import static com.smartsheet.utils.HttpUtils.saveUrlToFile;
@@ -32,152 +32,158 @@ import com.smartsheet.utils.ProgressWatcher;
  */
 public class ParallelDownloadService {
 
-    private final ExecutorService executor;
-    private final long allJobsDoneTimeoutMinutes;
+	private final ExecutorService executor;
 
-    /** The number of posted jobs */
-    private final AtomicInteger posts = new AtomicInteger();
-    /** The number of completed jobs */
-    private final AtomicInteger completions = new AtomicInteger();
-    /** The number of failed jobs */
-    private final AtomicInteger failures = new AtomicInteger();
+	/** The number of posted jobs */
+	private final AtomicInteger posts = new AtomicInteger();
+	/** The number of completed jobs */
+	private final AtomicInteger completions = new AtomicInteger();
+	/** The number of failed jobs */
+	private final AtomicInteger failures = new AtomicInteger();
 
-    /**
-     * @param numberOfThreads
-     *          The number of threads to allocate for parallel downloading.
-     *          It is recommended that this number is not more than the number
-     *          of cores on the executing machine. At least one thread must be
-     *          specified, or else {@link IllegalArgumentException} will be thrown.
-     *
-     * @param allJobsDoneTimeoutMinutes
-     *          The maximum timeout in minutes to wait until all parallel
-     *          download jobs are "done" (completed successfully) (applied when
-     *          the {@link #waitTillAllDownloadJobsDone} method is called). A
-     *          value of one or greater is expected.
-     */
-    public ParallelDownloadService(int numberOfThreads, long allJobsDoneTimeoutMinutes)
-            throws IllegalArgumentException {
+	/**
+	 * @param numberOfThreads
+	 *            The number of threads to allocate for parallel downloading. It
+	 *            is recommended that this number is not more than the number of
+	 *            cores on the executing machine. At least one thread must be
+	 *            specified, or else {@link IllegalArgumentException} will be
+	 *            thrown.
+	 */
+	public ParallelDownloadService(int numberOfThreads) throws IllegalArgumentException {
 
-        executor = Executors.newFixedThreadPool(numberOfThreads);
-        this.allJobsDoneTimeoutMinutes = allJobsDoneTimeoutMinutes;
-    }
+		executor = Executors.newFixedThreadPool(numberOfThreads);
+	}
 
-    /**
-     * Posts an asynchronous ("parallel") download job.
-     *
-     * @param source
-     *          The source of the file on the Internet to download.
-     *
-     * @param targetFile
-     *          The local file to download the source to. The file will be
-     *          created if it doesn't exist, and overwritten if it does.
-     *
-     * @param postedMessage
-     *          The message to log when the job has been posted.
-     *
-     * @param completedMessage
-     *          The message to log when the job has been completed.
-     *
-     * @param errorContext
-     *          Textual context to add to the error message logged when the job has failed.
-     */
-    public void postAsynchronousDownloadJob(
-            final InternetContentSource source,
-            final String postedMessage, 
-            final String errorContext,
-            final String folder,
-            final String targetFile) {
+	/**
+	 * Posts an asynchronous ("parallel") download job.
+	 * 
+	 * @param source
+	 *            The source of the file on the Internet to download.
+	 * 
+	 * @param targetFile
+	 *            The local file to download the source to. The file will be
+	 *            created if it doesn't exist, and overwritten if it does.
+	 * 
+	 * @param postedMessage
+	 *            The message to log when the job has been posted.
+	 * 
+	 * @param completedMessage
+	 *            The message to log when the job has been completed.
+	 * 
+	 * @param errorContext
+	 *            Textual context to add to the error message logged when the
+	 *            job has failed.
+	 */
+	public void postAsynchronousDownloadJob(final InternetContentSource source,
+			final String postedMessage, final String errorContext,
+			final String folder, final String targetFile) {
 
-        ProgressWatcher.getInstance().notify(postedMessage);
+		ProgressWatcher.getInstance().notify(postedMessage);
 
-        // Submit a new job, returning immediately. The job will be queued until
-        // a thread in the pool becomes available to handle it.
-        executor.execute(new Runnable() {
+		// Submit a new job, returning immediately. The job will be queued until
+		// a thread in the pool becomes available to handle it.
+		executor.execute(new Runnable() {
 
-            // The logic which is executed asynchronously when a thread becomes
-            // available to handle the job.
-            @Override
-            public void run() {
-            	// Create the file and get the name for the file
-            	String sourceUrl = "";
-                try {
-                	//targetFile = SheetSaver.createFileFor(source.getAttachment(), folder, null);
-                	String completedMessage = String.format("...%s Attachment [%s] downloaded as [%s]", 
-                			source.getAttachment().getAttachmentType(), source.getAttachment().getName(), targetFile);
-                	
-                	sourceUrl = source.getURL();
-                	
-                    saveUrlToFile(sourceUrl, new File(folder, targetFile));
+			// The logic which is executed asynchronously when a thread becomes
+			// available to handle the job.
+			@Override
+			public void run() {
+				// Create the file and get the name for the file
+				String sourceUrl = "";
+				try {
+					// targetFile =
+					// SheetSaver.createFileFor(source.getAttachment(), folder,
+					// null);
+					String completedMessage = String.format(
+							"...%s Attachment [%s] downloaded as [%s]", source
+									.getAttachment().getAttachmentType(),
+							source.getAttachment().getName(), targetFile);
 
-                    ProgressWatcher.getInstance().notify(completedMessage);
+					sourceUrl = source.getURL();
 
-                    completions.incrementAndGet();
+					saveUrlToFile(sourceUrl, new File(folder, targetFile));
 
-                } catch (Exception e) {
-                    failures.incrementAndGet();
+					ProgressWatcher.getInstance().notify(completedMessage);
 
-                    ProgressWatcher.getInstance().notifyError(String.format("[%s: %s] downloading from [%s] to [%s] for %s",
-                        e.getClass().getSimpleName(), e.getLocalizedMessage(), sourceUrl, targetFile, errorContext),e);
-                }
-            }});
+					completions.incrementAndGet();
 
-        // This is executed immediately after the job is posted.
-        posts.incrementAndGet();
-    }
-    
+				} catch (Exception e) {
+					failures.incrementAndGet();
 
+					ProgressWatcher
+							.getInstance()
+							.notifyError(
+									String.format(
+											"[%s: %s] downloading from [%s] to [%s] for %s",
+											e.getClass().getSimpleName(),
+											e.getLocalizedMessage(), sourceUrl,
+											targetFile, errorContext), e);
+				}
+			}
+		});
 
-    /**
-     * @return
-     *      {@code true} if all jobs were "done" (completed successfully);
-     *      otherwise {@code false}
-     */
-    public boolean waitTillAllDownloadJobsDone() {
-        // first check if we actually need to wait (optimization)
-        if (completions.intValue() == posts.intValue())
-            return true; // all jobs completed, no need to wait
+		// This is executed immediately after the job is posted.
+		posts.incrementAndGet();
+	}
 
-        if (failures.intValue() == posts.intValue()) {
-            ProgressWatcher.getInstance().notify("***WARNING*** All " + posts + " parallel download jobs failed (see previous logs)");
-            return false; // all jobs failed, also no need to wait
-        }
+	/**
+	 * @return {@code true} if all jobs were "done" (completed successfully);
+	 *         otherwise {@code false}
+	 */
+	public boolean waitTillAllDownloadJobsDone() {
+		// first check if we actually need to wait (optimization)
+		if (completions.intValue() == posts.intValue())
+			return true; // all jobs completed, no need to wait
 
-        // initiate shutdown
-        executor.shutdown();
+		if (failures.intValue() == posts.intValue()) {
+			ProgressWatcher
+					.getInstance()
+					.notify("***WARNING*** All "
+							+ posts
+							+ " parallel download jobs failed (see previous logs)");
+			return false; // all jobs failed, also no need to wait
+		}
 
-        // prepare to wait
-        String timeUnits = allJobsDoneTimeoutMinutes <= 1 ? "minute" : "minutes";
-        if(allJobsDoneTimeoutMinutes == Integer.MAX_VALUE){
-        	ProgressWatcher.getInstance().notify("Waiting for outstanding download jobs to complete.");
-        }else{
-        	ProgressWatcher.getInstance().notify("Wait up to " + allJobsDoneTimeoutMinutes + " " + timeUnits + 
-        			" for any outstanding parallel download jobs...");
-        }
+		// initiate shutdown
+		executor.shutdown();
 
-        // wait...
-        boolean allDone = false;
-        try {
-            allDone = executor.awaitTermination(allJobsDoneTimeoutMinutes, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            // user or system interrupted the wait
-        }
+		ProgressWatcher.getInstance().notify("Waiting for outstanding download jobs to complete.");
 
-        if (!allDone)
-            ProgressWatcher.getInstance().notifyError("Not all parallel download jobs completed. Please retry with a longer wait.", null);
+		// wait...
+		boolean allDone = false;
+		try {
+			// Wait a really long time
+			allDone = executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+		} catch (InterruptedException e) {
+			// user or system interrupted the wait
+		}
 
-        // force shutdown
-        executor.shutdownNow();
+		if (!allDone)
+			ProgressWatcher
+					.getInstance()
+					.notifyError(
+							"Not all parallel download jobs completed. Please retry with a longer wait.",
+							null);
 
-        // check if all completed (completions equal posts)
-        allDone = completions.intValue() == posts.intValue();
-        if (!allDone)
-            ProgressWatcher.getInstance().notify("***WARNING*** " + failures.intValue() + " of " + posts.intValue() + " parallel download jobs didn't complete (see previous logs)");
+		// force shutdown
+		executor.shutdownNow();
 
-        // since now shutdown, reset counters
-        posts.set(0);
-        completions.set(0);
-        failures.set(0);
+		// check if all completed (completions equal posts)
+		allDone = completions.intValue() == posts.intValue();
+		if (!allDone)
+			ProgressWatcher
+					.getInstance()
+					.notify("***WARNING*** "
+							+ failures.intValue()
+							+ " of "
+							+ posts.intValue()
+							+ " parallel download jobs didn't complete (see previous logs)");
 
-        return allDone;
-    }
+		// since now shutdown, reset counters
+		posts.set(0);
+		completions.set(0);
+		failures.set(0);
+
+		return allDone;
+	}
 }
