@@ -24,6 +24,8 @@ This command-line backup utility takes a snapshot of the data in a Smartsheet Te
 
 Release History
 ------------
+* Apr 23 2014 - version 1.5.1:
+ - Changed the generated backup folder name to contain a 24 hour format instead of 12 hour.
 * Mar 14 2014 - version 1.5:
  - Increased wait time for the backup to finish downloading attachments. It will now wait a very long time (2^63 days).
 * Mar 11 2014 - version 1.4:
