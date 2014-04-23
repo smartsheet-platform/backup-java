@@ -75,7 +75,7 @@ public class SmartsheetBackupTool {
 			String accessToken = getRequiredProp(props, "accessToken");
 			String outputDir = getRequiredProp(props, "outputDir")
 					+ "/"
-					+ new SimpleDateFormat("yyyy-MM-dd_hh_mm_ss")
+					+ new SimpleDateFormat("yyyy-MM-dd_HH_mm_ss")
 							.format(new Date());
 			boolean zipOutputDir = getOptionalProp(props, "zipOutputDir",
 					DEFAULT_ZIP_OUTPUT_DIR_FLAG);
