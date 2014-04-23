@@ -8,3 +8,4 @@
 *.ear
 target
 ./dependency-reduced-pom.xml
+/backup
