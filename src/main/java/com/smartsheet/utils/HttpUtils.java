@@ -37,6 +37,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import com.smartsheet.exceptions.ServiceUnavailableException;
 import com.smartsheet.restapi.service.RetryingSmartsheetService;
 import com.smartsheet.tools.SmartsheetBackupTool;
+import sun.misc.IOUtils;
 
 /**
  * Utilities for HTTP operations.
@@ -181,7 +182,14 @@ public class HttpUtils {
         	// This exception is caught and causes it to try again.
         	throw new ServiceUnavailableException(url);
         }else if (statusCode != 200) {
-            throw new IOException("GET " + url + " returned " + statusCode + " (" + reason + ")");
+            // Try to get the response as well
+            String errorResponse = "";
+            try {
+                errorResponse = org.apache.commons.io.IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+            }catch(Exception e) {
+                //ignore
+            }
+            throw new IOException("GET " + url + " returned: " + statusCode + " - " + reason + " " + errorResponse+"\n");
         }
 
         HttpEntity entity = response.getEntity();

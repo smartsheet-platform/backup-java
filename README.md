@@ -24,6 +24,8 @@ This command-line backup utility takes a snapshot of the data in a Smartsheet Te
 
 Release History
 ------------
+* Feb 11 2015 - version 1.5.2:
+ - Added the api error code and error response to the log if a request fails.
 * Apr 23 2014 - version 1.5.1:
  - Changed the generated backup folder name to contain a 24 hour format instead of 12 hour.
 * Mar 14 2014 - version 1.5:
@@ -70,7 +72,7 @@ How it works
 
 Usage
 ------------
-First, download the backup zipped archive from the Developer Portal tools page [here](https://googledrive.com/host/0B7xwgf7q3I5ITzFkLUFpa2hUUTQ/smartsheet-org-backup-1.5.1.zip).  Unzip the archive - it will contain the JAR executable and a sample properties file.
+First, download the backup zipped archive from the Developer Portal tools page [here](https://googledrive.com/host/0B7xwgf7q3I5ITzFkLUFpa2hUUTQ/smartsheet-org-backup-1.5.2.zip).  Unzip the archive - it will contain the JAR executable and a sample properties file.
 
 The tool will look for smartsheet-backup.properties file in the current directory (the directory from which it is being executed).
 Edit the properties file to set the following parameters:

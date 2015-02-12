@@ -4,7 +4,7 @@
   <groupId>com.smartsheet.tools</groupId>
   <artifactId>smartsheet-org-backup</artifactId>
   <name>Smartsheet Org Backup</name>
-  <version>1.2</version>
+  <version>1.5.2</version>
   <description>Backs up the Smartsheet sheets of all users in an organization to a local directory.</description>
   <build>
     <pluginManagement>
@@ -12,6 +12,9 @@
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.16</version>
+          <configuration>
+            <skipTests>true</skipTests>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
