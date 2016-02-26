@@ -93,10 +93,10 @@
               "mimeType": "image/jpeg",
               "id": 1168656408307588,
               "sizeInKb": 760,
-              "createdAt": "2013-05-15T10:27:51-04:00"
+              "createdAt": "2013-05-15T10:27:51Z"
             }
           ],
-          "lastCommentedAt": "2013-05-15T10:27:50-04:00",
+          "lastCommentedAt": "2013-05-15T10:27:50Z",
           "lastCommentedUser": {
             "email": "wwmcheung@hotmail.com",
             "name": "William Cheung"
@@ -109,7 +109,7 @@
           "url": "http://smartsheet.com",
           "attachmentType": "LINK",
           "id": 1811020307031940,
-          "createdAt": "2013-05-12T09:42:32-04:00"
+          "createdAt": "2013-05-12T09:42:32Z"
         },
         {
           "name": "gravatar william.jpeg",
@@ -117,7 +117,7 @@
           "mimeType": "image/jpeg",
           "id": 5751669980981124,
           "sizeInKb": 3,
-          "createdAt": "2013-05-12T09:42:05-04:00"
+          "createdAt": "2013-05-12T09:42:05Z"
         },
         {
           "name": "williamcheung.jpg",
@@ -125,12 +125,12 @@
           "mimeType": "image/jpeg",
           "id": 8918263468976004,
           "sizeInKb": 11,
-          "createdAt": "2013-05-12T09:40:55-04:00"
+          "createdAt": "2013-05-12T09:40:55Z"
         }
       ],
       "expanded": true,
-      "createdAt": "2013-05-12T09:40:43-04:00",
-      "modifiedAt": "2013-05-12T09:40:43-04:00"
+      "createdAt": "2013-05-12T09:40:43Z",
+      "modifiedAt": "2013-05-12T09:40:43Z"
     }
   ],
   "accessLevel": "OWNER",
@@ -145,10 +145,10 @@
           "mimeType": "image/png",
           "id": 2884143655741316,
           "sizeInKb": 4,
-          "createdAt": "2013-05-12T10:09:29-04:00"
+          "createdAt": "2013-05-12T10:09:29Z"
         }
       ],
-      "lastCommentedAt": "2013-05-12T10:09:28-04:00",
+      "lastCommentedAt": "2013-05-12T10:09:28Z",
       "lastCommentedUser": {
         "email": "wwmcheung@hotmail.com",
         "name": "William Cheung"
@@ -161,7 +161,7 @@
       "url": "http://www.smartsheet.com/developers/api-documentation",
       "attachmentType": "LINK",
       "id": 6446561329735556,
-      "createdAt": "2013-05-12T09:02:32-04:00"
+      "createdAt": "2013-05-12T09:02:32Z"
     },
     {
       "name": "P1060066.JPG",
@@ -169,14 +169,14 @@
       "attachmentType": "BOX_COM",
       "mimeType": "image/jpeg",
       "id": 1239274260588420,
-      "createdAt": "2013-05-12T08:54:52-04:00"
+      "createdAt": "2013-05-12T08:54:52Z"
     },
     {
       "name": "http://smartsheet.com",
       "url": "http://smartsheet.com",
       "attachmentType": "LINK",
       "id": 1309643004766084,
-      "createdAt": "2013-05-12T08:52:25-04:00"
+      "createdAt": "2013-05-12T08:52:25Z"
     },
     {
       "name": "gravatar william.jpeg",
@@ -184,7 +184,7 @@
       "mimeType": "image/jpeg",
       "id": 2750003237152644,
       "sizeInKb": 3,
-      "createdAt": "2013-05-12T01:49:24-04:00"
+      "createdAt": "2013-05-12T01:49:24Z"
     },
     {
       "name": "gravatar william.jpeg",
@@ -192,11 +192,11 @@
       "mimeType": "image/jpeg",
       "id": 572970214156164,
       "sizeInKb": 3,
-      "createdAt": "2013-05-12T00:19:49-04:00"
+      "createdAt": "2013-05-12T00:19:49Z"
     }
   ],
   "version": 16,
   "permalink": "https://www.smartsheet.com/b/home?lx=S3JIQ5icqlwB3ixs4-jpdQ",
-  "createdAt": "2013-05-10T12:39:36-04:00",
-  "modifiedAt": "2013-05-15T18:55:10-04:00"
+  "createdAt": "2013-05-10T12:39:36Z",
+  "modifiedAt": "2013-05-15T18:55:10Z"
 }

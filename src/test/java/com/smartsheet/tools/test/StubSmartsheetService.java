@@ -18,8 +18,11 @@ package com.smartsheet.tools.test;
 
 import java.util.List;
 
+import org.codehaus.jackson.type.TypeReference;
+
 import com.smartsheet.restapi.model.SmartsheetAttachment;
 import com.smartsheet.restapi.model.SmartsheetHome;
+import com.smartsheet.restapi.model.SmartsheetPagingwrapper;
 import com.smartsheet.restapi.model.SmartsheetSheet;
 import com.smartsheet.restapi.model.SmartsheetUser;
 import com.smartsheet.restapi.service.JsonDeserializer;
@@ -32,10 +35,11 @@ import com.smartsheet.testutils.TestUtils;
 public class StubSmartsheetService implements SmartsheetService {
 
     @Override
-    public List<SmartsheetUser> getUsers() throws Exception {
+    public SmartsheetPagingwrapper<SmartsheetUser> getUsers(int page) throws Exception {
 
         String json = TestUtils.getSampleGetUsersJsonResponse();
-        return new JsonDeserializer<SmartsheetUser>().deserializeArray(json, SmartsheetUser.class);
+        return (new JsonDeserializer<SmartsheetPagingwrapper<SmartsheetUser>>().deserialize(json,
+				new TypeReference<SmartsheetPagingwrapper<SmartsheetUser>>() {}));
     }
 
     @Override
@@ -53,7 +57,7 @@ public class StubSmartsheetService implements SmartsheetService {
     }
 
     @Override
-    public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception {
+    public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName,long sheetId) throws Exception {
 
         String json = TestUtils.getSampleGetAttachmentJsonResponse();
         return new JsonDeserializer<SmartsheetAttachment>().deserialize(json, SmartsheetAttachment.class);

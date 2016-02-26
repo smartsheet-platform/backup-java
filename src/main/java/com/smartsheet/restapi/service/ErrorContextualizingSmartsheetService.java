@@ -24,6 +24,7 @@ import com.smartsheet.exceptions.SmartsheetGetSheetDetailsException;
 import com.smartsheet.exceptions.SmartsheetGetUsersException;
 import com.smartsheet.restapi.model.SmartsheetAttachment;
 import com.smartsheet.restapi.model.SmartsheetHome;
+import com.smartsheet.restapi.model.SmartsheetPagingwrapper;
 import com.smartsheet.restapi.model.SmartsheetSheet;
 import com.smartsheet.restapi.model.SmartsheetUser;
 
@@ -32,71 +33,73 @@ import com.smartsheet.restapi.model.SmartsheetUser;
  * {@link Exception}s thrown by the delegate. The contextualization is done by
  * wrapping the {@link Exception} from the delegate in a new {@link Exception}
  * which adds context based on the current service method being invoked and the
- * parameters of this invocation. It is this new {@link Exception} which is thrown.
+ * parameters of this invocation. It is this new {@link Exception} which is
+ * thrown.
  */
 public class ErrorContextualizingSmartsheetService implements SmartsheetService, Cloneable {
 
-    private SmartsheetService delegateService;
+	private SmartsheetService delegateService;
 
-    public ErrorContextualizingSmartsheetService(SmartsheetService delegateService) {
-        this.delegateService = delegateService;
-    }
+	public ErrorContextualizingSmartsheetService(SmartsheetService delegateService) {
+		this.delegateService = delegateService;
+	}
 
-    @Override
-    public List<SmartsheetUser> getUsers() throws Exception {
-        try {
-            return delegateService.getUsers();
-        } catch (Exception e) {
-            throw new SmartsheetGetUsersException(e);
-        }
-    }
+	@Override
+	public SmartsheetPagingwrapper<SmartsheetUser> getUsers(int page) throws Exception {
+		try {
+			return delegateService.getUsers(page);
+		} catch (Exception e) {
+			throw new SmartsheetGetUsersException(e);
+		}
+	}
 
-    @Override
-    public SmartsheetHome getHome() throws Exception {
-        try {
-            return delegateService.getHome();
-        } catch (Exception e) {
-            throw new SmartsheetGetHomeException(e);
-        }
-    }
+	@Override
+	public SmartsheetHome getHome() throws Exception {
+		try {
+			return delegateService.getHome();
+		} catch (Exception e) {
+			throw new SmartsheetGetHomeException(e);
+		}
+	}
 
-    @Override
-    public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
-        try {
-            return delegateService.getSheetDetails(sheetName, sheetId);
-        } catch (Exception e) {
-            throw new SmartsheetGetSheetDetailsException(e, sheetName, sheetId);
-        }
-    }
+	@Override
+	public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
+		try {
+			return delegateService.getSheetDetails(sheetName, sheetId);
+		} catch (Exception e) {
+			throw new SmartsheetGetSheetDetailsException(e, sheetName, sheetId);
+		}
+	}
 
-    @Override
-    public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception {
-        try {
-            return delegateService.getAttachmentDetails(attachmentName, attachmentId, sheetName);
-        } catch (Exception e) {
-            throw new SmartsheetGetAttachmentDetailsException(e, attachmentName, attachmentId, sheetName);
-        }
-    }
+	@Override
+	public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName,
+			long sheetId) throws Exception {
+		try {
+			return delegateService.getAttachmentDetails(attachmentName, attachmentId, sheetName, sheetId);
+		} catch (Exception e) {
+			throw new SmartsheetGetAttachmentDetailsException(e, attachmentName, attachmentId, sheetName);
+		}
+	}
 
-    @Override
-    public String getAccessToken() {
-        return delegateService.getAccessToken();
-    }
+	@Override
+	public String getAccessToken() {
+		return delegateService.getAccessToken();
+	}
 
-    @Override
-    public void assumeUser(String assumedUserEmail) {
-        delegateService.assumeUser(assumedUserEmail);
-    }
+	@Override
+	public void assumeUser(String assumedUserEmail) {
+		delegateService.assumeUser(assumedUserEmail);
+	}
 
-    @Override
-    public String getAssumedUser() {
-        return delegateService.getAssumedUser();
-    }
-    
-    @Override
+	@Override
+	public String getAssumedUser() {
+		return delegateService.getAssumedUser();
+	}
+
+	@Override
 	public Object clone() throws CloneNotSupportedException {
-    	ErrorContextualizingSmartsheetService ecss = (ErrorContextualizingSmartsheetService)super.clone();
-    	ecss.delegateService = (SmartsheetService)this.delegateService.clone();
-    	return ecss;
-    }
+		ErrorContextualizingSmartsheetService ecss = (ErrorContextualizingSmartsheetService) super.clone();
+		ecss.delegateService = (SmartsheetService) this.delegateService.clone();
+		return ecss;
+	}
 }

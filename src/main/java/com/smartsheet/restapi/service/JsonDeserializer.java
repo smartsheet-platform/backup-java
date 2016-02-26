@@ -24,37 +24,45 @@ import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.JavaType;
+import org.codehaus.jackson.type.TypeReference;
 
 public class JsonDeserializer<T> {
 
-    /**
-     * {@link ObjectMapper} is thread-safe as long as it's not reconfigured,
-     * therefore can make this mapper static final for best performance.
-     */
-    private static final ObjectMapper mapper = newMapper();
+	/**
+	 * {@link ObjectMapper} is thread-safe as long as it's not reconfigured,
+	 * therefore can make this mapper static final for best performance.
+	 */
+	private static final ObjectMapper mapper = newMapper();
 
-    /**
-     * Deserialize a JSON object.
-     */
-    public T deserialize(String json, Class<T> type)
-            throws JsonMappingException, JsonParseException, IOException {
+	/**
+	 * Deserialize a JSON object.
+	 */
+	public T deserialize(String json, Class<T> type) throws JsonMappingException, JsonParseException, IOException {
 
-        return mapper.readValue(json, type);
-    }
+		return mapper.readValue(json, type);
+	}
 
-    /**
-     * Deserialize a JSON array.
-     */
-    public List<T> deserializeArray(String json, Class<T> type)
-            throws JsonMappingException, JsonParseException, IOException {
+	/**
+	 * Deserialize a JSON object.
+	 */
+	public T deserialize(String json, TypeReference<T> type)
+			throws JsonMappingException, JsonParseException, IOException {
+		return mapper.readValue(json, type);
+	}
 
-        JavaType listType = mapper.getTypeFactory().constructCollectionType(List.class, type);
-        return mapper.readValue(json, listType);
-    }
+	/**
+	 * Deserialize a JSON array.
+	 */
+	public List<T> deserializeArray(String json, Class<T> type)
+			throws JsonMappingException, JsonParseException, IOException {
 
-    private static ObjectMapper newMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper;
-    }
+		JavaType listType = mapper.getTypeFactory().constructCollectionType(List.class, type);
+		return mapper.readValue(json, listType);
+	}
+
+	private static ObjectMapper newMapper() {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		return mapper;
+	}
 }

@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.smartsheet.exceptions.ServiceUnavailableException;
 import com.smartsheet.restapi.model.SmartsheetAttachment;
 import com.smartsheet.restapi.model.SmartsheetHome;
+import com.smartsheet.restapi.model.SmartsheetPagingwrapper;
 import com.smartsheet.restapi.model.SmartsheetSheet;
 import com.smartsheet.restapi.model.SmartsheetUser;
 
@@ -32,42 +33,43 @@ import com.smartsheet.restapi.model.SmartsheetUser;
  */
 public class StubRecoveringServiceUnavailableSmartsheetService extends StubSmartsheetService {
 
-    private final AtomicInteger countGetUserCalls = new AtomicInteger();
-    private final AtomicInteger countGetHomeCalls = new AtomicInteger();
-    private final AtomicInteger countGetSheetDetails = new AtomicInteger();
-    private final AtomicInteger countGetAttachmentDetails = new AtomicInteger();
+	private final AtomicInteger countGetUserCalls = new AtomicInteger();
+	private final AtomicInteger countGetHomeCalls = new AtomicInteger();
+	private final AtomicInteger countGetSheetDetails = new AtomicInteger();
+	private final AtomicInteger countGetAttachmentDetails = new AtomicInteger();
 
-    @Override
-    public List<SmartsheetUser> getUsers() throws Exception {
-        if (countGetUserCalls.getAndIncrement() == 0)
-            throw new ServiceUnavailableException();
-        return super.getUsers();
-    }
+	@Override
+	public SmartsheetPagingwrapper<SmartsheetUser> getUsers(int page) throws Exception {
+		if (countGetUserCalls.getAndIncrement() == 0)
+			throw new ServiceUnavailableException();
+		return super.getUsers(page);
+	}
 
-    @Override
-    public SmartsheetHome getHome() throws Exception {
-        if (countGetHomeCalls.getAndIncrement() == 0)
-            throw new ServiceUnavailableException();
-        return super.getHome();
-    }
+	@Override
+	public SmartsheetHome getHome() throws Exception {
+		if (countGetHomeCalls.getAndIncrement() == 0)
+			throw new ServiceUnavailableException();
+		return super.getHome();
+	}
 
-    @Override
-    public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
-        if (countGetSheetDetails.getAndIncrement() == 0)
-            throw new ServiceUnavailableException();
-        return super.getSheetDetails(sheetName, sheetId);
-    }
+	@Override
+	public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
+		if (countGetSheetDetails.getAndIncrement() == 0)
+			throw new ServiceUnavailableException();
+		return super.getSheetDetails(sheetName, sheetId);
+	}
 
-    @Override
-    public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception {
-        if (countGetAttachmentDetails.getAndIncrement() == 0)
-            throw new ServiceUnavailableException();
-        return super.getAttachmentDetails(attachmentName, attachmentId, sheetName);
-    }
+	@Override
+	public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName,
+			long sheetId) throws Exception {
+		if (countGetAttachmentDetails.getAndIncrement() == 0)
+			throw new ServiceUnavailableException();
+		return super.getAttachmentDetails(attachmentName, attachmentId, sheetName, sheetId);
+	}
 
-    @Override
-    public String getAccessToken() {
-        return null;
-    }
+	@Override
+	public String getAccessToken() {
+		return null;
+	}
 
 }

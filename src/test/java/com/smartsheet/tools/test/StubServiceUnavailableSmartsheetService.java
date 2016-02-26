@@ -21,6 +21,7 @@ import java.util.List;
 import com.smartsheet.exceptions.ServiceUnavailableException;
 import com.smartsheet.restapi.model.SmartsheetAttachment;
 import com.smartsheet.restapi.model.SmartsheetHome;
+import com.smartsheet.restapi.model.SmartsheetPagingwrapper;
 import com.smartsheet.restapi.model.SmartsheetSheet;
 import com.smartsheet.restapi.model.SmartsheetUser;
 import com.smartsheet.restapi.service.SmartsheetService;
@@ -31,42 +32,43 @@ import com.smartsheet.restapi.service.SmartsheetService;
  */
 public class StubServiceUnavailableSmartsheetService implements SmartsheetService {
 
-    @Override
-    public List<SmartsheetUser> getUsers() throws Exception {
-        throw new ServiceUnavailableException();
-    }
+	@Override
+	public SmartsheetPagingwrapper<SmartsheetUser> getUsers(int page) throws Exception {
+		throw new ServiceUnavailableException();
+	}
 
-    @Override
-    public SmartsheetHome getHome() throws Exception {
-        throw new ServiceUnavailableException();
-    }
+	@Override
+	public SmartsheetHome getHome() throws Exception {
+		throw new ServiceUnavailableException();
+	}
 
-    @Override
-    public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
-        throw new ServiceUnavailableException();
-    }
+	@Override
+	public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
+		throw new ServiceUnavailableException();
+	}
 
-    @Override
-    public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception {
-        throw new ServiceUnavailableException();
-    }
+	@Override
+	public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName,long sheetId)
+			throws Exception {
+		throw new ServiceUnavailableException();
+	}
 
-    @Override
-    public String getAccessToken() {
-        return null;
-    }
+	@Override
+	public String getAccessToken() {
+		return null;
+	}
 
-    @Override
-    public void assumeUser(String assumedUserEmail) {
-    }
+	@Override
+	public void assumeUser(String assumedUserEmail) {
+	}
 
-    @Override
-    public String getAssumedUser() {
-        return null;
-    }
-    
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-    	return super.clone();
-    }
+	@Override
+	public String getAssumedUser() {
+		return null;
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
 }

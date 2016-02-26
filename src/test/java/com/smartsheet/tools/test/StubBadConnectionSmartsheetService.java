@@ -31,54 +31,57 @@ import com.smartsheet.restapi.service.SmartsheetService;
  */
 public class StubBadConnectionSmartsheetService extends StubSmartsheetService {
 
-    private static final String INVALID_S3_URL = "https://s3.amazonaws.com/SmartsheetBx/73de1644e44ad916e6b9e937cec2d";
+	private static final String INVALID_S3_URL = "https://s3.amazonaws.com/SmartsheetBx/73de1644e44ad916e6b9e937cec2d";
 
-    protected boolean simulateRandomConnectionErrors = true;
+	protected boolean simulateRandomConnectionErrors = true;
 
-    @Override
-    public SmartsheetHome getHome() throws Exception {
+	@Override
+	public SmartsheetHome getHome() throws Exception {
 
-        if (isConnectionCurrentlyBad())
-            throw fakeConnectionException();
+		if (isConnectionCurrentlyBad())
+			throw fakeConnectionException();
 
-        return super.getHome();
-    }
+		return super.getHome();
+	}
 
-    @Override
-    public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
+	@Override
+	public SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception {
 
-        if (isConnectionCurrentlyBad())
-            throw fakeConnectionException();
+		if (isConnectionCurrentlyBad())
+			throw fakeConnectionException();
 
-        return super.getSheetDetails(sheetName, sheetId);
-    }
+		return super.getSheetDetails(sheetName, sheetId);
+	}
 
-    @Override
-    public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception {
+	@Override
+	public SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName,
+			long sheetId) throws Exception {
 
-        if (isConnectionCurrentlyBad())
-            throw fakeConnectionException();
+		if (isConnectionCurrentlyBad())
+			throw fakeConnectionException();
 
-        SmartsheetAttachment attachmentDetails = super.getAttachmentDetails(attachmentName, attachmentId, sheetName);
+		SmartsheetAttachment attachmentDetails = super.getAttachmentDetails(attachmentName, attachmentId, sheetName,
+				sheetId);
 
-        if (isConnectionCurrentlyBad()) {
-            // fake the connection being bad when the caller tries to retrieve
-            // the attachment referenced in the attachment details by returning an
-            // invalid S3 URL
-            attachmentDetails.setUrl(INVALID_S3_URL);
-        }
+		if (isConnectionCurrentlyBad()) {
+			// fake the connection being bad when the caller tries to retrieve
+			// the attachment referenced in the attachment details by returning
+			// an
+			// invalid S3 URL
+			attachmentDetails.setUrl(INVALID_S3_URL);
+		}
 
-        return attachmentDetails;
-    }
+		return attachmentDetails;
+	}
 
-    private boolean isConnectionCurrentlyBad() {
-        if (simulateRandomConnectionErrors)
-            return new Random().nextBoolean();
+	private boolean isConnectionCurrentlyBad() {
+		if (simulateRandomConnectionErrors)
+			return new Random().nextBoolean();
 
-        return false;
-    }
+		return false;
+	}
 
-    protected static IOException fakeConnectionException() {
-        return new IOException("Connection refused");
-    }
+	protected static IOException fakeConnectionException() {
+		return new IOException("Connection refused");
+	}
 }

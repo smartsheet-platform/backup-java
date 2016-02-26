@@ -188,7 +188,7 @@ public class SmartsheetBackupServiceTest {
         System.out.println("-------------------- check error log file: " + errorLogFile  + " --------------------");
     }
 
-    private void backupToTempDir(SmartsheetBackupService backupService) throws Exception {
+	private void backupToTempDir(SmartsheetBackupService backupService) throws Exception {
         Date timeBeforeBackup = new Date();
 
         File backupFolder = new File(

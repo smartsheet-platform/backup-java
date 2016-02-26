@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.smartsheet.restapi.model.SmartsheetAttachment;
 import com.smartsheet.restapi.model.SmartsheetHome;
+import com.smartsheet.restapi.model.SmartsheetPagingwrapper;
 import com.smartsheet.restapi.model.SmartsheetSheet;
 import com.smartsheet.restapi.model.SmartsheetUser;
 
@@ -28,13 +29,13 @@ import com.smartsheet.restapi.model.SmartsheetUser;
  */
 public interface SmartsheetService {
 
-    List<SmartsheetUser> getUsers() throws Exception;
+	SmartsheetPagingwrapper<SmartsheetUser> getUsers(int page) throws Exception;
 
     SmartsheetHome getHome() throws Exception;
 
     SmartsheetSheet getSheetDetails(String sheetName, long sheetId) throws Exception;
 
-    SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName) throws Exception;
+    SmartsheetAttachment getAttachmentDetails(String attachmentName, long attachmentId, String sheetName, long sheetId) throws Exception;
 
     String getAccessToken();
 

@@ -35,6 +35,7 @@ import com.smartsheet.restapi.model.SmartsheetDiscussion;
 import com.smartsheet.restapi.model.SmartsheetFolder;
 import com.smartsheet.restapi.model.SmartsheetHome;
 import com.smartsheet.restapi.model.SmartsheetNamedEntity;
+import com.smartsheet.restapi.model.SmartsheetPagingwrapper;
 import com.smartsheet.restapi.model.SmartsheetRow;
 import com.smartsheet.restapi.model.SmartsheetSheet;
 import com.smartsheet.restapi.model.SmartsheetUser;
@@ -45,297 +46,319 @@ import com.smartsheet.utils.ProgressWatcher;
 
 /**
  * Backs up the Smartsheet sheets of either the current user or all users to a
- * local directory, maintaining the folder / workspace hierarchy from Smartsheet.
+ * local directory, maintaining the folder / workspace hierarchy from
+ * Smartsheet.
  */
 public class SmartsheetBackupService {
 
-    // Smartsheet API constants
-    private static final String USER_ACTIVE_STATUS = "ACTIVE";
-    private static final String OWNER_ACCESS = "OWNER";
-    private static final String FILE_ATTACHMENT_TYPE = "FILE";
+	// Smartsheet API constants
+	private static final String USER_ACTIVE_STATUS = "ACTIVE";
+	private static final String OWNER_ACCESS = "OWNER";
+	private static final String FILE_ATTACHMENT_TYPE = "FILE";
 
-    private final SmartsheetService apiService;
-    private final SheetSaver sheetSaver;
+	private final SmartsheetService apiService;
+	private final SheetSaver sheetSaver;
 
-    public SmartsheetBackupService(
-            SmartsheetService apiService, ParallelDownloadService parallelDownloadService) {
-        this.apiService = apiService;
-        this.sheetSaver = new SheetSaver(apiService, parallelDownloadService);
-    }
+	public SmartsheetBackupService(SmartsheetService apiService, ParallelDownloadService parallelDownloadService) {
+		this.apiService = apiService;
+		this.sheetSaver = new SheetSaver(apiService, parallelDownloadService);
+	}
 
-    /**
-     * Backs up the sheets of all users in the organization to a local directory.
-     * Requires an access token from an account administrator. Only active users
-     * are backed up, not pending or other inactive users (such users cannot be
-     * accessed through an access token, even an admin access token).
-     *
-     * @param backupFolder
-     *          The folder to backup to. Created if it doesn't exist. Warning:
-     *          contents are overwritten. A sub folder will be created under
-     *          this folder for each user. The sub folder will be named with the
-     *          user's email address. Note that email addresses are valid as
-     *          folder names on all mainstream operating systems.
-     *
-     * @return
-     *          The number of users whose sheets were backed up (hence pending
-     *          and other inactive users are excluded from the number returned).
-     *
-     * @throws Exception
-     */
-    public int backupOrgTo(File backupFolder) throws Exception {
-    	// get all users in the organization and prepare the backup folder
-        List<SmartsheetUser> users = apiService.getUsers();
-        
-        prepareBackupFolder(backupFolder, true);
+	/**
+	 * Backs up the sheets of all users in the organization to a local
+	 * directory. Requires an access token from an account administrator. Only
+	 * active users are backed up, not pending or other inactive users (such
+	 * users cannot be accessed through an access token, even an admin access
+	 * token).
+	 *
+	 * @param backupFolder
+	 *            The folder to backup to. Created if it doesn't exist. Warning:
+	 *            contents are overwritten. A sub folder will be created under
+	 *            this folder for each user. The sub folder will be named with
+	 *            the user's email address. Note that email addresses are valid
+	 *            as folder names on all mainstream operating systems.
+	 *
+	 * @return The number of users whose sheets were backed up (hence pending
+	 *         and other inactive users are excluded from the number returned).
+	 *
+	 * @throws Exception
+	 */
+	public int backupOrgTo(File backupFolder) throws Exception {
+		// get all users in the organization and prepare the backup folder
+		List<SmartsheetUser> users = new ArrayList<SmartsheetUser>();
+		int pageNumber = 1;
+		int noofpages = 1;
+		SmartsheetPagingwrapper<SmartsheetUser> usersPagingWrapper = null;
 
-        // iterate through the users, backing up the active ones
-        int numberUsers = users.size();
-        int skippedUsers = 0;
-        try {
-            for (int i = 0; i < numberUsers; i++) {
-                SmartsheetUser user = users.get(i);
-                String email = user.getEmail();
-                String status = user.getStatus();
+		while (pageNumber <= noofpages) {
+			usersPagingWrapper = apiService.getUsers(pageNumber);
+			pageNumber = usersPagingWrapper.getPageNumber();
+			noofpages = usersPagingWrapper.getTotalPages();
+			users.addAll(usersPagingWrapper.getData());
+			pageNumber++;
+		}
 
-                // for each active user, assume the identity of the user to
-                // backup that user's sheets in the user's context (e.g., what
-                // sheets they own, the hierarchy they see in Smartsheet, etc.)
-                if (status.equals(USER_ACTIVE_STATUS)) {
+		prepareBackupFolder(backupFolder, true);
 
-                    ProgressWatcher.getInstance().notify(String.format(
-                        "--------------------Start backup for user [%d of %d]: %s--------------------",
-                        i+1, numberUsers, email));
-                    try {
-                        assumeUserAndBackup(backupFolder, email);
+		// iterate through the users, backing up the active ones
+		int numberUsers = users.size();
+		int skippedUsers = 0;
+		try {
+			for (int i = 0; i < numberUsers; i++) {
+				SmartsheetUser user = users.get(i);
+				String email = user.getEmail();
+				String status = user.getStatus();
 
-                    } catch (Exception e) {
-                        ErrorHandler.handle(e, email);
-                        skippedUsers++;
-                    }
+				// for each active user, assume the identity of the user to
+				// backup that user's sheets in the user's context (e.g., what
+				// sheets they own, the hierarchy they see in Smartsheet, etc.)
+				if (status.equals(USER_ACTIVE_STATUS)) {
 
-                } else {
-                    // user not active yet and will result in 401 (Unauthorized)
-                    // if try to assume their identity, so skip...
-                    ProgressWatcher.getInstance().notify(String.format(
-                        "--------------------SKIP backup for user [%d of %d]: %s (%s)--------------------",
-                        i+1, numberUsers, email, status.toLowerCase()));
-                    skippedUsers++;
-                }
-            }
+					ProgressWatcher.getInstance()
+							.notify(String.format(
+									"--------------------Start backup for user [%d of %d]: %s--------------------",
+									i + 1, numberUsers, email));
+					try {
+						assumeUserAndBackup(backupFolder, email);
 
-        } finally {
-            apiService.assumeUser(null); // revert to self before returning
-        }
+					} catch (Exception e) {
+						ErrorHandler.handle(e, email);
+						skippedUsers++;
+					}
 
-        // return the number of users backed up, excluding skipped inactive users
-        return numberUsers - skippedUsers;
-    }
+				} else {
+					// user not active yet and will result in 401 (Unauthorized)
+					// if try to assume their identity, so skip...
+					ProgressWatcher.getInstance()
+							.notify(String.format(
+									"--------------------SKIP backup for user [%d of %d]: %s (%s)--------------------",
+									i + 1, numberUsers, email, status.toLowerCase()));
+					skippedUsers++;
+				}
+			}
 
-    /**
-     * Assume the identity of a specified user and backup the user's sheets in
-     * the user's context. A sub folder will be created under the specified
-     * folder and named with the user's email address. Note that email
-     * addresses are valid as folder names on all mainstream operating systems.
-     * Hence no replacement of characters in the email address is required for
-     * use as a folder name.
-     */
-    private void assumeUserAndBackup(File backupFolder, String userEmail) throws Exception {
-        File userFolder = createNewFolderQuietly(backupFolder, userEmail);
-        apiService.assumeUser(userEmail);
-        backupTo(userFolder, userEmail);
-    }
+		} finally {
+			apiService.assumeUser(null); // revert to self before returning
+		}
 
-    /**
-     * Backs up the sheets of the current user to a local directory.
-     *
-     * @param backupFolder
-     *          The folder to backup to. Created if it doesn't exist.
-     *          Warning: contents are overwritten.
-     *
-     * @throws Exception
-     */
-    public void backupTo(File backupFolder, String userEmail) throws Exception {
-        SmartsheetHome home = apiService.getHome();
-        List<SmartsheetSheet> sheets = home.getSheets();
-        List<SmartsheetFolder> folders = home.getFolders();
-        List<SmartsheetWorkspace> workspaces = home.getWorkspaces();
+		// return the number of users backed up, excluding skipped inactive
+		// users
+		return numberUsers - skippedUsers;
+	}
 
-        prepareBackupFolder(backupFolder, false);
+	/**
+	 * Assume the identity of a specified user and backup the user's sheets in
+	 * the user's context. A sub folder will be created under the specified
+	 * folder and named with the user's email address. Note that email addresses
+	 * are valid as folder names on all mainstream operating systems. Hence no
+	 * replacement of characters in the email address is required for use as a
+	 * folder name.
+	 */
+	private void assumeUserAndBackup(File backupFolder, String userEmail) throws Exception {
+		File userFolder = createNewFolderQuietly(backupFolder, userEmail);
+		apiService.assumeUser(userEmail);
+		backupTo(userFolder, userEmail);
+	}
 
-        // first create the two "root" folders of the Smartsheet hierarchy to mimic the Home UI
-        File sheetsRoot = createNewFolder(backupFolder, "Sheets");
-        File workspacesRoot = createNewFolder(backupFolder, "Workspaces");
+	/**
+	 * Backs up the sheets of the current user to a local directory.
+	 *
+	 * @param backupFolder
+	 *            The folder to backup to. Created if it doesn't exist. Warning:
+	 *            contents are overwritten.
+	 *
+	 * @throws Exception
+	 */
+	public void backupTo(File backupFolder, String userEmail) throws Exception {
+		SmartsheetHome home = apiService.getHome();
+		List<SmartsheetSheet> sheets = home.getSheets();
+		List<SmartsheetFolder> folders = home.getFolders();
+		List<SmartsheetWorkspace> workspaces = home.getWorkspaces();
 
-        // and save the top-level sheets
-        for (SmartsheetSheet sheet : sheets) {
-            try{
-            	saveSheetToFolder(sheet, sheetsRoot);
-            }catch(Exception ex){
-            	ErrorHandler.handle(ex, userEmail);
-            }
-        }
+		prepareBackupFolder(backupFolder, false);
 
-        // then create and save the rest of the hierarchy with contained sheets and attachments
-        createFoldersRecursively(sheetsRoot, folders);
-        createFoldersRecursively(workspacesRoot, workspaces);
-    }
+		// first create the two "root" folders of the Smartsheet hierarchy to
+		// mimic the Home UI
+		File sheetsRoot = createNewFolder(backupFolder, "Sheets");
+		File workspacesRoot = createNewFolder(backupFolder, "Workspaces");
 
-    /**
-     * Prepares the backup folder by creating it if it doesn't exist, and
-     * clearing its contents if it does.
-     *
-     * @param backupFolder
-     * @throws FileSystemItemException
-     */
-    private static void prepareBackupFolder(File backupFolder, boolean isRootFolder) throws FileSystemItemException {
+		// and save the top-level sheets
+		for (SmartsheetSheet sheet : sheets) {
+			try {
+				saveSheetToFolder(sheet, sheetsRoot);
+			} catch (Exception ex) {
+				ErrorHandler.handle(ex, userEmail);
+			}
+		}
 
-    	
-    	if (backupFolder.exists() && !backupFolder.isDirectory()){
-            throw new IllegalArgumentException(backupFolder.getAbsolutePath() + " is not a directory");
-        }else if(backupFolder.exists()){
-    		return;
-    	}
+		// then create and save the rest of the hierarchy with contained sheets
+		// and attachments
+		createFoldersRecursively(sheetsRoot, folders);
+		createFoldersRecursively(workspacesRoot, workspaces);
+	}
 
-        if (!backupFolder.mkdirs()){
-            throw new CreateFileSystemItemException(backupFolder);
-        }
-    }
+	/**
+	 * Prepares the backup folder by creating it if it doesn't exist, and
+	 * clearing its contents if it does.
+	 *
+	 * @param backupFolder
+	 * @throws FileSystemItemException
+	 */
+	private static void prepareBackupFolder(File backupFolder, boolean isRootFolder) throws FileSystemItemException {
 
-    private void saveSheetToFolder(SmartsheetSheet sheet, File folder) throws Exception {
-        // only sheets owned by the current user are backed up
-        if (!sheet.getAccessLevel().equals(OWNER_ACCESS))
-            return;
+		if (backupFolder.exists() && !backupFolder.isDirectory()) {
+			throw new IllegalArgumentException(backupFolder.getAbsolutePath() + " is not a directory");
+		} else if (backupFolder.exists()) {
+			return;
+		}
 
-        File sheetFile = sheetSaver.save(sheet, folder);
-        ProgressWatcher.getInstance().notify(String.format("Sheet [%s] saved as [%s]", sheet.getName(), sheetFile.getAbsolutePath()));
+		if (!backupFolder.mkdirs()) {
+			throw new CreateFileSystemItemException(backupFolder);
+		}
+	}
 
-        // get sheet details and...
-        sheet = this.apiService.getSheetDetails(sheet.getName(), sheet.getId());
-        // 1. collect sheet attachments
-        List<SmartsheetAttachment> attachments = new ArrayList<SmartsheetAttachment>(sheet.getAttachments());
-        // 2. collect sheet discussion attachments
-        for (SmartsheetDiscussion discussion : sheet.getDiscussions()) {
-            attachments.addAll(discussion.getCommentAttachments());
-        }
+	private void saveSheetToFolder(SmartsheetSheet sheet, File folder) throws Exception {
+		// only sheets owned by the current user are backed up
+		if (!sheet.getAccessLevel().equals(OWNER_ACCESS))
+			return;
 
-        // iterate rows and...
-        for (SmartsheetRow row : sheet.getRows()) {
-            // 1. collect row attachments
-            attachments.addAll(row.getAttachments());
-            // 2. collect row discussion attachments
-            for (SmartsheetDiscussion discussion : row.getDiscussions()) {
-                attachments.addAll(discussion.getCommentAttachments());
-            }
-        }
+		File sheetFile = sheetSaver.save(sheet, folder);
+		ProgressWatcher.getInstance()
+				.notify(String.format("Sheet [%s] saved as [%s]", sheet.getName(), sheetFile.getAbsolutePath()));
 
-        // create a new folder for attachments, if any
-        if (!attachments.isEmpty())
-            folder = createNewFolder(folder, stripExtension(sheetFile.getName()) + " - attachments");
+		// get sheet details and...
+		sheet = this.apiService.getSheetDetails(sheet.getName(), sheet.getId());
+		// 1. collect sheet attachments
+		List<SmartsheetAttachment> attachments = new ArrayList<SmartsheetAttachment>(sheet.getAttachments());
+		// 2. collect sheet discussion attachments
+		for (SmartsheetDiscussion discussion : sheet.getDiscussions()) {
+			attachments.addAll(discussion.getCommentAttachments());
+		}
 
-        Set<String> usedFiles = new HashSet<String>();
+		// iterate rows and...
+		for (SmartsheetRow row : sheet.getRows()) {
+			// 1. collect row attachments
+			attachments.addAll(row.getAttachments());
+			// 2. collect row discussion attachments
+			for (SmartsheetDiscussion discussion : row.getDiscussions()) {
+				attachments.addAll(discussion.getCommentAttachments());
+			}
+		}
 
-        // save each attachment appropriately, either as a file or as a summary for non-files
-        for (SmartsheetAttachment attachment : attachments) {
-            String attachmentType = attachment.getAttachmentType();
-            if (attachmentType.equals(FILE_ATTACHMENT_TYPE)) {
-            	// The api shouldn't return an empty name
-            	if(attachment.getName() == null || attachment.getName().isEmpty()){continue;}
-            	
-            	// Rebuild filename with the base name scrubed.
-            	String targetFile = SheetSaver.scrubName(FilenameUtils.getBaseName(attachment.getName()));
-            	if(!FilenameUtils.getExtension(attachment.getName()).isEmpty()){
-            		targetFile += "."+FilenameUtils.getExtension(attachment.getName());
-            	}
-            	
-            	// Get a unique filename
-            	for(int i = 1; usedFiles.contains(targetFile); i++){
-            		String basename = FilenameUtils.getBaseName(targetFile);
-            		String extension = FilenameUtils.getExtension(targetFile);
-            		
-            		if(i > 1){
-            			targetFile = basename.replaceAll("\\([0-9]+\\)$", "("+i+")");
-            		}else{
-            			targetFile = basename + " ("+i+")";
-            		}
-            		
-            		if(!extension.isEmpty()){
-            			targetFile += "."+extension;
-            		}
-            	}
-            	
-            	// Keep running list of files processed
-            	usedFiles.add(targetFile);
-            	
-                sheetSaver.saveAsynchronously(attachment, folder, sheet.getName(), targetFile);
-            } else {
-                File summariesFile = sheetSaver.saveSummary(attachment, sheet, folder);
-                ProgressWatcher.getInstance().notify(String.format("%s Attachment [%s] recorded in [%s]", 
-                		attachmentType, attachment.getName(), summariesFile.getAbsolutePath()));
-            }
-        }
-    }
+		// create a new folder for attachments, if any
+		if (!attachments.isEmpty())
+			folder = createNewFolder(folder, stripExtension(sheetFile.getName()) + " - attachments");
 
-    // The following are helper methods for creating local folders, with and
-    // without notification (logging).
+		Set<String> usedFiles = new HashSet<String>();
 
-    private static File createNewFolder(File parentFolder, String newFolderName)
-            throws FileSystemItemException {
-        return createNewFolder(parentFolder, newFolderName, null);
-    }
+		// save each attachment appropriately, either as a file or as a summary
+		// for non-files
+		for (SmartsheetAttachment attachment : attachments) {
+			String attachmentType = attachment.getAttachmentType();
+			if (attachmentType.equals(FILE_ATTACHMENT_TYPE)) {
+				// The api shouldn't return an empty name
+				if (attachment.getName() == null || attachment.getName().isEmpty()) {
+					continue;
+				}
 
-    private static File createNewFolder(File parentFolder, String newFolderName, String origFolderName)
-            throws FileSystemItemException {
-        File newFolder = createNewFolderQuietly(parentFolder, newFolderName);
+				// Rebuild filename with the base name scrubed.
+				String targetFile = SheetSaver.scrubName(FilenameUtils.getBaseName(attachment.getName()));
+				if (!FilenameUtils.getExtension(attachment.getName()).isEmpty()) {
+					targetFile += "." + FilenameUtils.getExtension(attachment.getName());
+				}
 
-        if (origFolderName == null)
-            origFolderName = newFolderName;
+				// Get a unique filename
+				for (int i = 1; usedFiles.contains(targetFile); i++) {
+					String basename = FilenameUtils.getBaseName(targetFile);
+					String extension = FilenameUtils.getExtension(targetFile);
 
-        ProgressWatcher.getInstance().notify(String.format("Folder [%s] created as [%s]", origFolderName, newFolder.getAbsolutePath()));
-        return newFolder;
-    }
+					if (i > 1) {
+						targetFile = basename.replaceAll("\\([0-9]+\\)$", "(" + i + ")");
+					} else {
+						targetFile = basename + " (" + i + ")";
+					}
 
-    private static File createNewFolderQuietly(File parentFolder, String newFolderName) throws CreateFileSystemItemException {
-        File newFolder = new File(parentFolder, SheetSaver.scrubName(newFolderName));
-        
-        if (!newFolder.mkdir())
-            throw new CreateFileSystemItemException(newFolder);
-        return newFolder;
-    }
+					if (!extension.isEmpty()) {
+						targetFile += "." + extension;
+					}
+				}
 
-    // The following are helper methods for creating a Smartsheet folder or
-    // workspace hierarchy under a local folder using recursion. Since folders
-    // in Smartsheet can have duplicate names even at the same level, duplicates
-    // in a local folder where this is not permitted are resolved using a number
-    // suffix starting from 2 (as in "folder name (2)", "folder name (3)", etc.)
+				// Keep running list of files processed
+				usedFiles.add(targetFile);
 
-    private void createFoldersRecursively(File parentFolder, List<? extends SmartsheetFolder> folders)
-            throws Exception {
-        for (SmartsheetFolder folder : folders) {
-            // create folder
-            String folderName = findNonDupeFolderName(parentFolder, folder.getName());
-            File newFolder = createNewFolder(parentFolder, folderName, folder.getName());
+				sheetSaver.saveAsynchronously(attachment, folder, sheet.getName(), sheet.getId(), targetFile);
+			} else {
+				File summariesFile = sheetSaver.saveSummary(attachment, sheet, folder);
+				ProgressWatcher.getInstance().notify(String.format("%s Attachment [%s] recorded in [%s]",
+						attachmentType, attachment.getName(), summariesFile.getAbsolutePath()));
+			}
+		}
+	}
 
-            // save sheets in folder
-            List<SmartsheetSheet> sheets = folder.getSheets();
-            for (SmartsheetSheet sheet : sheets) {
-                saveSheetToFolder(sheet, newFolder);
-            }
+	// The following are helper methods for creating local folders, with and
+	// without notification (logging).
 
-            // create subfolders and save their sheets
-            createFoldersRecursively(newFolder, folder.getFolders());
-        }
-    }
+	private static File createNewFolder(File parentFolder, String newFolderName) throws FileSystemItemException {
+		return createNewFolder(parentFolder, newFolderName, null);
+	}
 
-    private static String findNonDupeFolderName(File parentFolder, String baseFolderName) {
-        String candidateFolderName = baseFolderName;
-        int numberSuffix = 2;
-        while (true) { // keep looping until get a non duplicate folder name
-            if (!folderNameExistsInParentFolder(candidateFolderName, parentFolder.getAbsolutePath()))
-                return candidateFolderName; // this name is not used in the parent folder
+	private static File createNewFolder(File parentFolder, String newFolderName, String origFolderName)
+			throws FileSystemItemException {
+		File newFolder = createNewFolderQuietly(parentFolder, newFolderName);
 
-            // otherwise try another name by appending an incrementing number suffix
-            candidateFolderName = baseFolderName + " (" + numberSuffix + ")";
-            numberSuffix++;
-        }
-    }
+		if (origFolderName == null)
+			origFolderName = newFolderName;
+
+		ProgressWatcher.getInstance()
+				.notify(String.format("Folder [%s] created as [%s]", origFolderName, newFolder.getAbsolutePath()));
+		return newFolder;
+	}
+
+	private static File createNewFolderQuietly(File parentFolder, String newFolderName)
+			throws CreateFileSystemItemException {
+		File newFolder = new File(parentFolder, SheetSaver.scrubName(newFolderName));
+
+		if (!newFolder.mkdir())
+			throw new CreateFileSystemItemException(newFolder);
+		return newFolder;
+	}
+
+	// The following are helper methods for creating a Smartsheet folder or
+	// workspace hierarchy under a local folder using recursion. Since folders
+	// in Smartsheet can have duplicate names even at the same level, duplicates
+	// in a local folder where this is not permitted are resolved using a number
+	// suffix starting from 2 (as in "folder name (2)", "folder name (3)", etc.)
+
+	private void createFoldersRecursively(File parentFolder, List<? extends SmartsheetFolder> folders)
+			throws Exception {
+		for (SmartsheetFolder folder : folders) {
+			// create folder
+			String folderName = findNonDupeFolderName(parentFolder, folder.getName());
+			File newFolder = createNewFolder(parentFolder, folderName, folder.getName());
+
+			// save sheets in folder
+			List<SmartsheetSheet> sheets = folder.getSheets();
+			for (SmartsheetSheet sheet : sheets) {
+				saveSheetToFolder(sheet, newFolder);
+			}
+
+			// create subfolders and save their sheets
+			createFoldersRecursively(newFolder, folder.getFolders());
+		}
+	}
+
+	private static String findNonDupeFolderName(File parentFolder, String baseFolderName) {
+		String candidateFolderName = baseFolderName;
+		int numberSuffix = 2;
+		while (true) { // keep looping until get a non duplicate folder name
+			if (!folderNameExistsInParentFolder(candidateFolderName, parentFolder.getAbsolutePath()))
+				return candidateFolderName; // this name is not used in the
+											// parent folder
+
+			// otherwise try another name by appending an incrementing number
+			// suffix
+			candidateFolderName = baseFolderName + " (" + numberSuffix + ")";
+			numberSuffix++;
+		}
+	}
 }

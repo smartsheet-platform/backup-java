@@ -1,4 +1,9 @@
-[
+{
+  "pageNumber": 2,
+  "pageSize": 1,
+  "totalPages": 2,
+  "totalCount": 2,
+  "data": [
   {
     "email": "wwmcheung@hotmail.com",
     "admin": true,
@@ -22,3 +27,4 @@
     "status": "PENDING"
   }
 ]
+}

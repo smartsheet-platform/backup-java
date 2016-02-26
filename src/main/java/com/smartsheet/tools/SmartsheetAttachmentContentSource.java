@@ -24,27 +24,30 @@ import com.smartsheet.restapi.service.SmartsheetService;
  */
 public class SmartsheetAttachmentContentSource implements InternetContentSource {
 
-    private final SmartsheetService apiService;
-    private final SmartsheetAttachment attachment;
-    private final String sheetName;
+	private final SmartsheetService apiService;
+	private final SmartsheetAttachment attachment;
+	private final String sheetName;
+	private final long sheetId;
 
-    public SmartsheetAttachmentContentSource(SmartsheetService apiService,
-            SmartsheetAttachment attachment, String sheetName) {
-        this.apiService = apiService;
-        this.attachment = attachment;
-        this.sheetName = sheetName;
-    }
+	public SmartsheetAttachmentContentSource(SmartsheetService apiService, SmartsheetAttachment attachment,
+			String sheetName, long sheetId) {
+		this.apiService = apiService;
+		this.attachment = attachment;
+		this.sheetName = sheetName;
+		this.sheetId = sheetId;
+	}
 
-    @Override
-    public String getURL() throws Exception {
-    	SmartsheetAttachment attachmentDetails = apiService.getAttachmentDetails(
-            attachment.getName(), attachment.getId(), sheetName);
-        
-    	return attachmentDetails.getUrl(); // ethereal - valid for only 2 minutes
-    }
-    
-    @Override
-    public SmartsheetAttachment getAttachment(){
-    	return attachment;
-    }
+	@Override
+	public String getURL() throws Exception {
+		SmartsheetAttachment attachmentDetails = apiService.getAttachmentDetails(attachment.getName(),
+				attachment.getId(), sheetName, sheetId);
+
+		return attachmentDetails.getUrl(); // ethereal - valid for only 2
+											// minutes
+	}
+
+	@Override
+	public SmartsheetAttachment getAttachment() {
+		return attachment;
+	}
 }
