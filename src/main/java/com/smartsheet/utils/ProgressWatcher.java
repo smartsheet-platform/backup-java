@@ -29,7 +29,7 @@ import java.util.Date;
  * A Progress Watcher which receives status and error notifications, publishing
  * them to the console.
  */
-public class ProgressWatcher {
+public final class ProgressWatcher {
 
     private static final String SMARTSHEET_BACKUP_ERROR_LOG_PREFIX = "smartsheet-backup-error-log_";
     private static final String SMARTSHEET_BACKUP_ERROR_LOG_EXTENSION = ".log";

@@ -29,7 +29,7 @@ import com.smartsheet.exceptions.DeleteFileSystemItemException;
 /**
  * Utilities for file operations.
  */
-public class FileUtils {
+public final class FileUtils {
 
     private static final int ZIP_BUFFER_SIZE = 64*1024; // 64K
 

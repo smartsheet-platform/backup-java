@@ -19,7 +19,7 @@ package com.smartsheet.utils;
 /**
  * An application-level error handler.
  */
-public class ErrorHandler {
+public final class ErrorHandler {
 
     private ErrorHandler() {
         // private constructor because this is a singleton helper class, not intended to be instantiated
