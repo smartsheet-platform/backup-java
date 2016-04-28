@@ -41,7 +41,7 @@ import com.smartsheet.utils.ProgressWatcher;
  */
 public class SheetSaver {
 
-	private static final String XLS_EXTENSION = ".xls";
+	private static final String XLSX_EXTENSION = ".xlsx";
 
 	private final SmartsheetService apiService;
 	private final ParallelDownloadService parallelDownloadService;
@@ -62,7 +62,7 @@ public class SheetSaver {
 	 * @throws Exception
 	 */
 	public File save(SmartsheetSheet sheet, File folder) throws Exception {
-		File sheetFile = createFileFor(sheet, folder.getAbsolutePath(), XLS_EXTENSION);
+		File sheetFile = createFileFor(sheet, folder.getAbsolutePath(), XLSX_EXTENSION);
 		String url = RestfulSmartsheetService.API_BASE_URL + "sheets/" + sheet.getId();
 		String accessToken = apiService.getAccessToken();
 		String userToAssume = apiService.getAssumedUser();
@@ -152,7 +152,7 @@ public class SheetSaver {
 	 * already exists in the folder. In that case a number will be appended to
 	 * the file name starting from 2 (such as "sheet name (2)") and upward until
 	 * a unique file name is found in the folder. An optional file extension can
-	 * also be specified (for example when you want to use ".xls" as the
+	 * also be specified (for example when you want to use ".xlsx" as the
 	 * extension of the file which a sheet is saved to.
 	 */
 	public static File createFileFor(SmartsheetNamedEntity item, String folder, String extension) throws IOException {

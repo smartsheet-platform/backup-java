@@ -24,6 +24,9 @@ This command-line backup utility takes a snapshot of the data in a Smartsheet Te
 
 Release History
 ------------
+* Apr 28 2016 - version 1.6.1:
+ - Changed extension of generated files from .xls to .xlsx
+ Updated to support Smartsheet API version 2.0
 * Mar 2 2016 - version 1.6.0:
  - Updated to support Smartsheet API version 2.0
 * Feb 11 2015 - version 1.5.2:
