@@ -77,7 +77,7 @@ How it works
 
 Usage
 ------------
-First, download the backup zipped archive from the Developer Portal tools page [here](https://googledrive.com/host/0B7xwgf7q3I5ITzFkLUFpa2hUUTQ/smartsheet-org-backup-1.6.0.zip).  Unzip the archive - it will contain the JAR executable and a sample properties file.
+First, download the backup zipped archive from the Developer Portal tools page [here](https://googledrive.com/host/0B7xwgf7q3I5ITzFkLUFpa2hUUTQ/smartsheet-org-backup-1.6.1.zip).  Unzip the archive - it will contain the JAR executable and a sample properties file.
 
 The tool will look for smartsheet-backup.properties file in the current directory (the directory from which it is being executed).
 Edit the properties file to set the following parameters:
