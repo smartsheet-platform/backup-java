@@ -112,6 +112,9 @@ public class SmartsheetBackupService {
 				// for each active user, assume the identity of the user to
 				// backup that user's sheets in the user's context (e.g., what
 				// sheets they own, the hierarchy they see in Smartsheet, etc.)
+                if(status==null){
+                    continue;
+                }
 				if (status.equals(USER_ACTIVE_STATUS)) {
 
 					ProgressWatcher.getInstance()
