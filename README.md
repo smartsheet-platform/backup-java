@@ -89,7 +89,7 @@ Edit the properties file to set the following parameters:
 * **downloadThreads** (optional, default is 4) - set to desired number of threads used to download attachments
 * **allDownloadsDoneTimeout*** (optional, default is 2<sup>^32</sup>-1) - The total number of minutes to wait for the attachment downloads to finish.
 
-To execute the backup, run the following command "java -jar smartsheet-org-backup.jar".  Please replace with the current version of the backup tool - for instance, "1.5.1". You can determine the version easily by simply listing the contents of the directory and looking for the .jar file.
+To execute the backup, run the following command `java -jar smartsheet-org-backup.jar`.  Please replace with the current version of the backup tool - for instance, "1.5.1". You can determine the version easily by simply listing the contents of the directory and looking for the .jar file.
 Since it's a runnable jar, you don't need to set classpath or copy other jars. Everything you need is in the runnable jar.
 
 
