@@ -81,7 +81,7 @@ Usage
 ------------
 First, download the backup zipped archive [here](https://github.com/smartsheet-platform/backup-java/releases/download/1.6.2/smartsheet-org-backup-1.6.2.zip).  Unzip the archive - it will contain the JAR executable and a sample properties file.
 
-The tool will look for smartsheet-backup.properties file in the current directory (the directory from which it is being executed).
+The tool will look for `smartsheet-backup.properties` file in the current directory (the directory from which it is being executed).
 Edit the properties file to set the following parameters:
 
 * **accessToken** (required) - access token that belongs to your Smartsheet account administrator.  See the Requirements section above on how to get an access token
