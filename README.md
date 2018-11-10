@@ -24,6 +24,8 @@ This command-line backup utility takes a snapshot of the data in a Smartsheet Te
 
 Release History
 ------------
+* Nov 9, 2018 - version 1.6.2:
+ - Updated vulnerable dependencies.
 * Apr 28 2016 - version 1.6.1:
  - Changed extension of generated files from .xls to .xlsx
  Updated to support Smartsheet API version 2.0
@@ -77,7 +79,7 @@ How it works
 
 Usage
 ------------
-First, download the backup zipped archive from the Developer Portal tools page [here](https://drive.google.com/file/d/0B7xwgf7q3I5IRU1ROWYzaWpzaHc/view?usp=sharing).  Unzip the archive - it will contain the JAR executable and a sample properties file.
+First, download the backup zipped archive [here](https://github.com/smartsheet-platform/backup-java/releases/download/1.6.2/smartsheet-org-backup-1.6.2.zip).  Unzip the archive - it will contain the JAR executable and a sample properties file.
 
 The tool will look for smartsheet-backup.properties file in the current directory (the directory from which it is being executed).
 Edit the properties file to set the following parameters:
