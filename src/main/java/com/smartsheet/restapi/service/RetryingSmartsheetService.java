@@ -164,4 +164,8 @@ public class RetryingSmartsheetService implements SmartsheetService, Cloneable {
 		return rss;
 	}
 
+	@Override
+	public String getApiBaseUrl() {
+		return delegateService.getApiBaseUrl();
+	}
 }

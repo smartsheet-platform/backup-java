@@ -63,7 +63,7 @@ public class SheetSaver {
 	 */
 	public File save(SmartsheetSheet sheet, File folder) throws Exception {
 		File sheetFile = createFileFor(sheet, folder.getAbsolutePath(), XLSX_EXTENSION);
-		String url = RestfulSmartsheetService.API_BASE_URL + "sheets/" + sheet.getId();
+		String url = apiService.getApiBaseUrl() + "sheets/" + sheet.getId();
 		String accessToken = apiService.getAccessToken();
 		String userToAssume = apiService.getAssumedUser();
 		try {

@@ -37,13 +37,20 @@ import com.smartsheet.utils.HttpUtils;
  */
 public class RestfulSmartsheetService implements SmartsheetService, Cloneable {
 
-	public static final String API_BASE_URL = "https://api.smartsheet.com/2.0/";
+	public static final String DEFAULT_API_BASE_URL = "https://api.smartsheet.com/2.0/";
+	public final String API_BASE_URL;
 
 	private String accessToken;
 	private String assumedUserEmail;
 
 	public RestfulSmartsheetService(String accessToken) {
 		this.accessToken = accessToken;
+		this.API_BASE_URL = this.DEFAULT_API_BASE_URL;
+	}
+
+	public RestfulSmartsheetService(String accessToken, String apiBaseUrl) {
+		this.accessToken = accessToken;
+		this.API_BASE_URL = apiBaseUrl;
 	}
 
 	@Override
@@ -103,5 +110,10 @@ public class RestfulSmartsheetService implements SmartsheetService, Cloneable {
 		rss.accessToken = this.accessToken;
 
 		return rss;
+	}
+
+	@Override
+	public String getApiBaseUrl() {
+		return this.API_BASE_URL;
 	}
 }
