@@ -16,8 +16,13 @@
  **/
 package com.smartsheet.tools;
 
-import static com.smartsheet.utils.FileUtils.deleteFolder;
-import static com.smartsheet.utils.FileUtils.zipDirectory;
+import com.smartsheet.restapi.model.ProxyCredential;
+import com.smartsheet.restapi.service.ErrorContextualizingSmartsheetService;
+import com.smartsheet.restapi.service.RestfulSmartsheetService;
+import com.smartsheet.restapi.service.RetryingSmartsheetService;
+import com.smartsheet.restapi.service.SmartsheetService;
+import com.smartsheet.utils.ConfigHolder;
+import com.smartsheet.utils.ProgressWatcher;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,12 +33,8 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import com.smartsheet.restapi.service.ErrorContextualizingSmartsheetService;
-import com.smartsheet.restapi.service.RestfulSmartsheetService;
-import com.smartsheet.restapi.service.RetryingSmartsheetService;
-import com.smartsheet.restapi.service.SmartsheetService;
-import com.smartsheet.utils.ConfigHolder;
-import com.smartsheet.utils.ProgressWatcher;
+import static com.smartsheet.utils.FileUtils.deleteFolder;
+import static com.smartsheet.utils.FileUtils.zipDirectory;
 
 /**
  * The main class of the SmartsheetBackupTool utility program.
@@ -53,6 +54,8 @@ public class SmartsheetBackupTool {
 			.getInstance();
 	private static final ConfigHolder configHolder = ConfigHolder.getInstance();
 	public static final String VERSION = "1.3";
+
+	public static ProxyCredential proxyCredential = null;
 
 	/**
 	 * The entry point of the program which reads properties, instantiates
@@ -85,6 +88,21 @@ public class SmartsheetBackupTool {
 			int downloadThreads = getOptionalProp(props, "downloadThreads",
 					DEFAULT_DOWNLOAD_THREADS, 1);
 
+			String proxyUsername = getOptionalProp(props, "proxyUser", null);
+			String proxyPassowrd = getOptionalProp(props, "proxyPassword", null);
+			String proxyHost = getOptionalProp(props, "proxyHost", null);
+			int proxyPort;
+
+			try {
+				 proxyPort = Integer.parseInt(getOptionalProp(props, "proxyPort", null));
+			} catch(NumberFormatException e) {
+				proxyPort = 0;
+			}
+
+			if(proxyUsername != null && proxyPassowrd != null && proxyHost != null) {
+				proxyCredential = new ProxyCredential(proxyUsername, proxyPassowrd, proxyHost, proxyPort);
+			}
+
 			// 2. instantiate services
 			SmartsheetService apiService = new ErrorContextualizingSmartsheetService(
 			// the ErrorContextualizingSmartsheetService wraps the
@@ -92,7 +110,9 @@ public class SmartsheetBackupTool {
 					new RetryingSmartsheetService(
 					// the RetryingSmartsheetService wraps the
 					// RestfulSmartsheetService:
-							new RestfulSmartsheetService(accessToken)));
+							new RestfulSmartsheetService(accessToken)
+					)
+			);
 
 			ParallelDownloadService parallelDownloadService = new ParallelDownloadService(downloadThreads);
 
@@ -102,7 +122,6 @@ public class SmartsheetBackupTool {
 			SmartsheetBackupService backupService = new SmartsheetBackupService(
 					apiService, parallelDownloadService);
 			long startTime = System.currentTimeMillis();
-
 			// 3. back up the organization to a local folder
 			int numberUsers = backupService.backupOrgTo(new File(outputDir));
 
@@ -234,6 +253,13 @@ public class SmartsheetBackupTool {
 					+ "' must be an integer - '" + prop
 					+ "' is an invalid value");
 		}
+	}
+
+	private static String getOptionalProp(Properties props, String propName, String defaultValue) {
+		String prop = props.getProperty(propName, defaultValue);
+		if(prop != null)
+			return prop;
+		return defaultValue;
 	}
 
 	private static boolean getOptionalProp(Properties props, String propName,
