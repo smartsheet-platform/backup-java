@@ -86,7 +86,7 @@ The tool will look for `smartsheet-backup.properties` file in the current direct
 Edit the properties file to set the following parameters:
 
 * **accessToken** (required) - access token that belongs to your Smartsheet account administrator.  See the Requirements section above on how to get an access token
-* **outputDir** (required) - desired output directory.  You can provide an absolute * path (e.g., "C:\\some\\directory") or a path relative to the directory in which the backup utility resides (e.g., "some\directory"). Note that backslashes need to be escaped in the path by using two backslashes. UNC paths are also supported and a UNC path like \\Server01\backup\ would need be escaped to look like \\\\server01\\backup.
+* **outputDir** (required) - desired output directory.  You can provide an absolute * path (e.g., "C:\\some\\directory") or a path relative to the directory in which the backup utility resides (e.g., "some\directory"). Note that backslashes need to be escaped in the path by using two backslashes. UNC paths are also supported and a UNC path like \\\Server01\backup\ would need be escaped to look like \\\\server01\\backup.
 * **zipOutputDir** (optional, default is false) - set to true to create a zipped archive of the outputDir
 * **continueOnError*** (optional, default is false) - set to true to continue on error (instead of terminating the backup)
 * **downloadThreads** (optional, default is 4) - set to desired number of threads used to download attachments
