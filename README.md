@@ -24,6 +24,8 @@ This command-line backup utility takes a snapshot of the data in a Smartsheet Te
 
 Release History
 ------------
+* Auguest 15 , 2020 - version 1.8.0:
+ - dockerize backup tool
 * Auguest 15 , 2020 - version 1.7.0:
  - fixed to remove oracle lib reference and upgraded to openjdk 11
 * Jan 21, 2020 - fixed a broken link in the Readme
@@ -96,6 +98,15 @@ Edit the properties file to set the following parameters:
 
 To execute the backup, run the following command `java -jar smartsheet-org-backup.jar`.  Please replace with the current version of the backup tool - for instance, "1.5.1". You can determine the version easily by simply listing the contents of the directory and looking for the .jar file.
 Since it's a runnable jar, you don't need to set classpath or copy other jars. Everything you need is in the runnable jar.
+
+
+Dockerize & Docker-Compose
+--------------------------
+This utility can also be used as a docker container. This sample has dockerized and a sample docker-compose file to backup.
+
+```
+docker-compose run --rm smartsheetbackup
+```
 
 
 Logging
