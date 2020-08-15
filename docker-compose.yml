@@ -1,0 +1,10 @@
+version: "3.5"
+services:
+  smartsheetbackup:
+    build:
+      context: .
+    image: smartsheet/smartsheet-backup:openjdk-11
+    command: ["java", "-jar", "./smartsheet-org-backup-1.8.0.jar"]
+    volumes:
+      - "./backup:/app/backup"
+      - "./config/smartsheet-backup.properties:/app/smartsheet-backup.properties:ro"

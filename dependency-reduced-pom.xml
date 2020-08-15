@@ -4,7 +4,7 @@
   <groupId>com.smartsheet.tools</groupId>
   <artifactId>smartsheet-org-backup</artifactId>
   <name>Smartsheet Org Backup</name>
-  <version>1.7.0</version>
+  <version>1.8.0</version>
   <description>Backs up the Smartsheet sheets of all users in an organization to a local directory.</description>
   <build>
     <pluginManagement>
