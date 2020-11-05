@@ -102,4 +102,9 @@ public class ErrorContextualizingSmartsheetService implements SmartsheetService,
 		ecss.delegateService = (SmartsheetService) this.delegateService.clone();
 		return ecss;
 	}
+
+	@Override
+	public String getApiBaseUrl() {
+		return delegateService.getApiBaseUrl();
+	}
 }

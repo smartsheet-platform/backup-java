@@ -85,14 +85,19 @@ public class SmartsheetBackupTool {
 			int downloadThreads = getOptionalProp(props, "downloadThreads",
 					DEFAULT_DOWNLOAD_THREADS, 1);
 
+			String apiBaseUrl = getOptionalProp(props, "smartsheetApiBaseUrl");
+
 			// 2. instantiate services
+			RestfulSmartsheetService restfulService = apiBaseUrl == null ?
+					new RestfulSmartsheetService(accessToken) :
+					new RestfulSmartsheetService(accessToken, apiBaseUrl);
 			SmartsheetService apiService = new ErrorContextualizingSmartsheetService(
 			// the ErrorContextualizingSmartsheetService wraps the
 			// RetryingSmartsheetService:
 					new RetryingSmartsheetService(
 					// the RetryingSmartsheetService wraps the
 					// RestfulSmartsheetService:
-							new RestfulSmartsheetService(accessToken)));
+							restfulService));
 
 			ParallelDownloadService parallelDownloadService = new ParallelDownloadService(downloadThreads);
 
@@ -246,5 +251,13 @@ public class SmartsheetBackupTool {
 					+ Boolean.FALSE + "'");
 
 		return Boolean.valueOf(prop);
+	}
+
+	private static String getOptionalProp(Properties props, String propName) {
+		String prop = props.getProperty(propName);
+		if (prop == null || prop.trim().isEmpty())
+			return null;
+
+		return prop;
 	}
 }

@@ -112,7 +112,7 @@ public class SmartsheetBackupService {
 				// for each active user, assume the identity of the user to
 				// backup that user's sheets in the user's context (e.g., what
 				// sheets they own, the hierarchy they see in Smartsheet, etc.)
-				if (status.equals(USER_ACTIVE_STATUS)) {
+				if (status != null && status.equals(USER_ACTIVE_STATUS)) {
 
 					ProgressWatcher.getInstance()
 							.notify(String.format(
@@ -129,6 +129,7 @@ public class SmartsheetBackupService {
 				} else {
 					// user not active yet and will result in 401 (Unauthorized)
 					// if try to assume their identity, so skip...
+					status = (status != null) ? status : "status unknown";
 					ProgressWatcher.getInstance()
 							.notify(String.format(
 									"--------------------SKIP backup for user [%d of %d]: %s (%s)--------------------",
