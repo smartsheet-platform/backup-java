@@ -42,7 +42,7 @@ import sun.misc.IOUtils;
 /**
  * Utilities for HTTP operations.
  */
-public class HttpUtils {
+public final class HttpUtils {
 
     private static final String CHARSET = "UTF-8";
     private static final String ACCEPT_JSON_HEADER = "application/json; charset=" + CHARSET.toLowerCase();

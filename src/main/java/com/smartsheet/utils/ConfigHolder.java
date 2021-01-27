@@ -20,7 +20,7 @@ package com.smartsheet.utils;
  * A holder of specific configuration properties for the current application.
  * Any such properties are injected into this holder.
  */
-public class ConfigHolder {
+public final class ConfigHolder {
 
     private static final ConfigHolder singleton = new ConfigHolder();
 
