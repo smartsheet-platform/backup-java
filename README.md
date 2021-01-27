@@ -24,6 +24,8 @@ This command-line backup utility takes a snapshot of the data in a Smartsheet Te
 
 Release History
 ------------
+* Auguest 15 , 2020 - version 1.7.0:
+ - fixed to remove oracle lib reference and upgraded to openjdk 11
 * Jan 21, 2020 - fixed a broken link in the Readme
 * Nov 9, 2018 - version 1.6.2:
  - Updated vulnerable dependencies.
