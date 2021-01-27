@@ -11,3 +11,4 @@ target
 /backup
 .DS_Store
 .idea/
+config/*.properties

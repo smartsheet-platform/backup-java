@@ -37,7 +37,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import com.smartsheet.exceptions.ServiceUnavailableException;
 import com.smartsheet.restapi.service.RetryingSmartsheetService;
 import com.smartsheet.tools.SmartsheetBackupTool;
-import sun.misc.IOUtils;
 
 /**
  * Utilities for HTTP operations.
