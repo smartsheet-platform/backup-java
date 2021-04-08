@@ -81,4 +81,9 @@ public class StubSmartsheetService implements SmartsheetService {
 	public Object clone() throws CloneNotSupportedException {
     	return super.clone();
     }
+
+    @Override
+    public String getApiBaseUrl() {
+        return null;
+    }
 }

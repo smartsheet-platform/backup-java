@@ -9,3 +9,5 @@
 target
 ./dependency-reduced-pom.xml
 /backup
+.DS_Store
+.idea/
