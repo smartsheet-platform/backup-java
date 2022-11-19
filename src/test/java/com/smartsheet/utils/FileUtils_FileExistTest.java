@@ -2,6 +2,7 @@ package com.smartsheet.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -94,12 +95,12 @@ public class FileUtils_FileExistTest {
     }
     
     private void createUniqueFileInSystemTempFolder() throws IOException{
-        File tempFile = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX);
+        File tempFile = Files.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
         testFiles.add(tempFile);
     }
     
     private void createNewFolderInSystemTempFolder() throws IOException{
-        File tempFile = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX);
+        File tempFile = Files.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
         tempFile.mkdir();
         testFiles.add(tempFile);
     }

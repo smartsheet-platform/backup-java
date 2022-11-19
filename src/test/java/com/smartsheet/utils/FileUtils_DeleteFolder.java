@@ -2,6 +2,7 @@ package com.smartsheet.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -49,7 +50,7 @@ public class FileUtils_DeleteFolder {
   
     @Test
     public void testDeleteFolder_FolderWithOneFile() throws IOException{
-        File testFile = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testFolder);
+        File testFile = Files.createTempFile(testFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
         FileUtils.deleteFolder(testFolder);
         
         Assert.assertTrue(!testFolder.exists());
@@ -58,12 +59,12 @@ public class FileUtils_DeleteFolder {
   
     @Test
     public void testDeleteFolder_FolderWithSixFiles() throws IOException{
-        File testFile1 = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testFolder);
-        File testFile2 = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testFolder);
-        File testFile3 = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testFolder);
-        File testFile4 = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testFolder);
-        File testFile5 = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testFolder);
-        File testFile6 = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testFolder);
+        File testFile1 = Files.createTempFile(testFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
+        File testFile2 = Files.createTempFile(testFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
+        File testFile3 = Files.createTempFile(testFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
+        File testFile4 = Files.createTempFile(testFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
+        File testFile5 = Files.createTempFile(testFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
+        File testFile6 = Files.createTempFile(testFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
         
         FileUtils.deleteFolder(testFolder);
         
@@ -78,7 +79,7 @@ public class FileUtils_DeleteFolder {
   
     @Test
     public void testDeleteFolder_FolderWithOneFileAndEmptySubFolder() throws IOException{
-        File testFile = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testFolder);
+        File testFile = Files.createTempFile(testFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
         File testSubFolder = new File(testFolder.getAbsoluteFile() + File.separator + "docs");
         
         FileUtils.deleteFolder(testFolder);
@@ -92,7 +93,7 @@ public class FileUtils_DeleteFolder {
     public void testDeleteFolder_FolderWithContentInSubFolder() throws IOException{
         File testSubFolder = new File(testFolder.getAbsoluteFile() + File.separator + "docs");
         testSubFolder.mkdir();
-        File testFileInSubFolder = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testSubFolder);
+        File testFileInSubFolder = Files.createTempFile(testSubFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
         
         FileUtils.deleteFolder(testFolder);
         
@@ -105,11 +106,11 @@ public class FileUtils_DeleteFolder {
     public void testDeleteFolder_FolderWithContentInTwoSubFolder() throws IOException{
         File testDocsSubFolder = new File(testFolder.getAbsoluteFile() + File.separator + "docs");
         testDocsSubFolder.mkdir();
-        File testDoc = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testDocsSubFolder);
+        File testDoc = Files.createTempFile(testDocsSubFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
         
         File testHTMLSubFolder = new File(testFolder.getAbsoluteFile() + File.separator + "html");
         testHTMLSubFolder.mkdir();
-        File testHTMLDoc = File.createTempFile(TEST_FILE_PREFIX, TEST_FILE_SUFFIX, testHTMLSubFolder);
+        File testHTMLDoc = Files.createTempFile(testHTMLSubFolder.toPath(), TEST_FILE_PREFIX, TEST_FILE_SUFFIX).toFile();
         
         FileUtils.deleteFolder(testFolder);
         
